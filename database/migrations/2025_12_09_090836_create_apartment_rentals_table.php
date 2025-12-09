@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('apartment_rentals', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_canceled')->default(false);
             $table->foreignId('apartment_id')->constrained('apartments')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('rental_start_date');
