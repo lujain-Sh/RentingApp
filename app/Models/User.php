@@ -71,6 +71,12 @@ class User extends Authenticatable
     {
         return 'full_phone_str';
     }
+
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class, 'user_id');
+    }
+
     
 
 }
