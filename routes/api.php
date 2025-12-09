@@ -40,13 +40,7 @@ Route::prefix('/apartments')->group(function()
 {
     Route::post('/create',[ApartmentController::class,'create_apartment'])->middleware('auth:sanctum');
     Route::get('/', [ApartmentController::class, 'index']);
+    Route::get('/filter', [ApartmentController::class, 'filterApartment']);
     Route::get('/{id}', [ApartmentController::class, 'show']);
-    // Route::get('/filter/governorate', [ApartmentController::class, 'filterByGovernorate']);
-    // Route::get('/filter/city', [ApartmentController::class, 'filterByCity']);
-    // Route::get('/filter/price-range', [ApartmentController::class, 'filterByPriceRange']);
-    // Route::get('/filter/bedrooms', [ApartmentController::class, 'filterByBedrooms']);
-    // Route::get('/filter/bathrooms', [ApartmentController::class, 'filterByBathrooms']);
-    // Route::get('/filter/area', [ApartmentController::class, 'filterByArea']);
-    // Route::get('/filter/balcony', [ApartmentController::class, 'filterByBalcony']);
 });
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\createRentalRequest;
+use App\Http\Requests\CreateRentalRequest as RequestsCreateRentalRequest;
 use App\Models\ApartmentRentals;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,7 @@ class ApartmentRentalsController extends Controller
     //rental logic here
     // e.g., create rental, view rentals user id, edit rental ,remove retal.
     //
-    public function createRental(createRentalRequest $request, $apartment_id)
+    public function createRental(CreateRentalRequest $request, $apartment_id)
     {
         $user_id=Auth::user()->id;
         $validatedData=$request->validated();
@@ -61,7 +62,7 @@ class ApartmentRentalsController extends Controller
         ],200);
     }
 
-    public function updateRental($rental_id,createRentalRequest $request)
+    public function updateRental($rental_id,CreateRentalRequest $request)
     {
         $user_id=Auth::user()->id;
         $rental = ApartmentRentals::where('id', $rental_id)
