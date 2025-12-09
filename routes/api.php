@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
+use App\Http\Controllers\ApartmentRentalsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('/apartments/{apartment_id}/rentals',[ApartmentRentalsController::class,'createRental'])->middleware('auth:sanctum');
+Route::get('/user/rentals',[ApartmentRentalsController::class,'getUserRentals'])->middleware('auth:sanctum');
+Route::put('/user/rentals/{rental_id}/cancel',[ApartmentRentalsController::class,'cancelRental'])->middleware('auth:sanctum');
+Route::put('/user/rentals/{rental_id}/update',[ApartmentRentalsController::class,'updateRental'])->middleware('auth:sanctum');
 
 Route::prefix('/user')->group(function()
 {
