@@ -21,10 +21,11 @@ class CreateRentalRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $oneYearFromNow = now()->addYear()->toDateString();
+        return [  
             'apartment_id' => 'exists:apartments,id',
-            'rental_start_date' => 'required|date|before_or_equal:rental_end_date',
-            'rental_end_date' => 'required|date|after_or_equal:rental_start_date',  
+            'rental_start_date' => 'required|date|date_format:Y/m/d|after_or_equal:today|before_or_equal:' . $oneYearFromNow . '|before_or_equal:rental_end_date',
+            'rental_end_date' => 'required|date|date_format:Y/m/d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow,  
         ];
     }
 }
