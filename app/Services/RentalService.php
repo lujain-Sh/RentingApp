@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ApartmentRentals;
+use App\Models\ApartmentRental;
 use Carbon\Carbon;
 
 class RentalService
@@ -20,7 +20,7 @@ class RentalService
 
     private function checkOverlap(int $apartmentId, string $startDate, string $endDate, ?int $excludeRentalId = null): bool
     {
-        $query = ApartmentRentals::where('apartment_id', $apartmentId)
+        $query = ApartmentRental::where('apartment_id', $apartmentId)
             ->where('is_canceled', false);
         
         if ($excludeRentalId !== null) {
@@ -37,7 +37,7 @@ class RentalService
     
     public function areDatesSameAsCurrent(int $rentalId, string $startDate, string $endDate): bool
     {
-        $rental = ApartmentRentals::find($rentalId);
+        $rental = ApartmentRental::find($rentalId);
         
         if (!$rental) {
             return false;

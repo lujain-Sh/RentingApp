@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
-use App\Http\Controllers\ApartmentRentalsController;
+use App\Http\Controllers\ApartmentRentalController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,12 +11,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::put('/user/rentals/{rental_id}/update',[ApartmentRentalsController::class,'updateRental'])->middleware('auth:sanctum');
+Route::put('/user/rentals/{rental_id}/update',[ApartmentRentalController::class,'updateRental'])->middleware('auth:sanctum');
 
 Route::prefix('/user')->group(function()
 {
-    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalsController::class,'cancelRental'])->middleware('auth:sanctum');
-    Route::get('/rentals',[ApartmentRentalsController::class,'getUserRentals'])->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
+    Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
     Route::post('/register',[UserController::class,'register']);
     Route::post('/login',[UserController::class,'login']);
     Route::post('/logout',[UserController::class,'logout'])->middleware('auth:sanctum');
@@ -37,7 +37,7 @@ Route::prefix('/admin')->group(function()
 
 Route::prefix('/apartments')->group(function()
 {
-    Route::post('/{apartment_id}/rentals',[ApartmentRentalsController::class,'createRental'])->middleware('auth:sanctum');
+    Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
     Route::post('/create',[ApartmentController::class,'create_apartment'])->middleware('auth:sanctum');
     Route::get('/', [ApartmentController::class, 'index']);
     Route::get('/filter', [ApartmentController::class, 'filterApartment']);

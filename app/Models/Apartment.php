@@ -15,7 +15,7 @@ class Apartment extends Model
 
     public function details()
     {
-        return $this->hasOne(ApartmentDetails::class, 'apartment_id');
+        return $this->hasOne(ApartmentDetail::class, 'apartment_id');
     }
     public function assets()
     {

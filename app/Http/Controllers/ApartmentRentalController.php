@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\createRentalRequest;
 use App\Http\Requests\UpdateRentalRequest;
-use App\Models\ApartmentRentals;
+use App\Models\ApartmentRental;
 use App\Services\RentalService;
 use Illuminate\Support\Facades\Auth;
 
-class ApartmentRentalsController extends Controller
+class ApartmentRentalController extends Controller
 {
     protected $rentalService;
     
@@ -29,7 +29,7 @@ class ApartmentRentalsController extends Controller
         if ($this->rentalService->checkOverlapForCreate($apartment_id, $startDate, $endDate)) {
             return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
         }
-        $rental=ApartmentRentals::create($validatedData);
+        $rental=ApartmentRental::create($validatedData);
         return response()->json(['message'=>'rental created successfully','rental_id'=>$rental->id,],201);
     }
 
@@ -72,17 +72,17 @@ class ApartmentRentalsController extends Controller
         return response()->json(['message'=>'rental updated successfully',],200);
     }
 
-    private function getUserRental($rental_id): ?ApartmentRentals
+    private function getUserRental($rental_id): ?ApartmentRental
     {   
         $user_id = Auth::user()->id;
-        return ApartmentRentals::where('id', $rental_id)
+        return ApartmentRental::where('id', $rental_id)
             ->where('user_id', $user_id)->first();
     }
 
     public function getUserRentals()
     {
         $user_id = Auth::user()->id;
-        $rentals = ApartmentRentals::where('user_id', $user_id)->get();
+        $rentals = ApartmentRental::where('user_id', $user_id)->get();
         return response()->json($rentals, 200);
     }
 

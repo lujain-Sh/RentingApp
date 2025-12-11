@@ -79,7 +79,7 @@ class User extends Authenticatable
 
     public function rentals()
     {
-        return $this->hasMany(ApartmentRentals::class, 'user_id');
+        return $this->hasMany(ApartmentRental::class, 'user_id');
     }
 
 }
