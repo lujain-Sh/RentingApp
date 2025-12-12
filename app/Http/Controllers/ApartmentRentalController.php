@@ -86,5 +86,31 @@ class ApartmentRentalController extends Controller
         return response()->json($rentals, 200);
     }
 
+    public function approveRental($rental_id)
+    {
+        $rental=ApartmentRental::findOrFail($rental_id);
+        if($rental->is_canceled){
+            return response()->json(['message'=>'cannot approve a canceled rental',],422);
+        }
+        $rental->update(['is_admin_approved' => true]);
+        return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
+        if(!$rental){
+            return response()->json(['message'=>'rental not found',],404);
+        }
+    }
+
+    public function rejectRental($rental_id)
+    {
+        $rental=ApartmentRental::findOrFail($rental_id);
+        if($rental->is_canceled){
+            return response()->json(['message'=>'cannot reject a canceled rental',],422);
+        }
+        $rental->update(['is_admin_approved' => false]);
+        return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
+        if(!$rental){
+            return response()->json(['message'=>'rental not found',],404);
+        }
+    }
+
 
 }

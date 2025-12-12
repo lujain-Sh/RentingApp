@@ -13,6 +13,8 @@ class ApartmentRental extends Model
         'user_id',
         'rental_start_date',
         'rental_end_date',
+        'is_canceled',
+        'is_admin_approved',
     ];
 
     public function apartment()

@@ -15,6 +15,8 @@ Route::put('/user/rentals/{rental_id}/update',[ApartmentRentalController::class,
 
 Route::prefix('/user')->group(function()
 {
+    Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental'])->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
     Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
     Route::post('/register',[UserController::class,'register']);
