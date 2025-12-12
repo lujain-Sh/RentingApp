@@ -111,6 +111,9 @@ class ApartmentRentalController extends Controller
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot reject a canceled rental',],422);
         }
+        if($rental->is_admin_approved){
+            return response()->json(['message'=>'cannot reject an approved rental',],422);
+        }
         $rental->update(['is_admin_approved' => false]);
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
         if(!$rental){
