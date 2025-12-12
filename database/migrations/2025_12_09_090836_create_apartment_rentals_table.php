@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('rental_start_date');
             $table->date('rental_end_date');
             $table->boolean('is_admin_approved')->nullable();
+            $table->decimal('total_rental_price', 10, 2);
             $table->timestamps();
         });
     }

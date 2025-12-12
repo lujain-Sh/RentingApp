@@ -25,7 +25,8 @@ class CreateRentalRequest extends FormRequest
         return [  
             'apartment_id' => 'exists:apartments,id',
             'rental_start_date' => 'required|date|date_format:Y/m/d|after_or_equal:today|before_or_equal:' . $oneYearFromNow . '|before_or_equal:rental_end_date',
-            'rental_end_date' => 'required|date|date_format:Y/m/d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow,  
+            'rental_end_date' => 'required|date|date_format:Y/m/d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow, 
+            'total_rental_price' => 'nullable|numeric|min:0',
         ];
     }
 }

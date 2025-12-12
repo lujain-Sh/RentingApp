@@ -49,7 +49,7 @@ class ApartmentController extends Controller
                 'number_of_bedrooms' => $data['number_of_bedrooms'],
                 'number_of_bathrooms' => $data['number_of_bathrooms'],
                 'area_sq_meters' => $data['area_sq_meters'],
-                'rent_price' => $data['rent_price'],
+                'rent_price_per_night' => $data['rent_price_per_night'],
                 'description_ar' => $data['description_ar'],
                 'description_en' => $data['description_en'],
                 'has_balcony' => $data['has_balcony'],
@@ -143,7 +143,7 @@ class ApartmentController extends Controller
         }
         
         return $query->whereHas('details', function($q) use ($minPrice, $maxPrice) {
-            $q->whereBetween('rent_price', [$minPrice, $maxPrice]);
+            $q->whereBetween('rent_price_per_night', [$minPrice, $maxPrice]);
         });
     }
 

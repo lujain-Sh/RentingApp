@@ -2,23 +2,24 @@
 
 namespace App\Services;
 
+use App\Models\ApartmentDetail;
 use App\Models\ApartmentRental;
-use Carbon\Carbon;
+use DateTime;
 
 class RentalService
 {
 
-    public function checkOverlapForCreate(int $apartmentId, string $startDate, string $endDate): bool
+    public function checkOverlapForCreate(int $apartmentId, DateTime $startDate, DateTime $endDate): bool
     {
         return $this->checkOverlap($apartmentId, $startDate, $endDate);
     }
 
-    public function checkOverlapForUpdate(int $apartmentId, string $startDate, string $endDate, int $rentalId): bool
+    public function checkOverlapForUpdate(int $apartmentId, DateTime $startDate, DateTime $endDate, int $rentalId): bool
     {
         return $this->checkOverlap($apartmentId, $startDate, $endDate, $rentalId);
     }
 
-    private function checkOverlap(int $apartmentId, string $startDate, string $endDate, ?int $excludeRentalId = null): bool
+    private function checkOverlap(int $apartmentId, DateTime $startDate, DateTime $endDate, ?int $excludeRentalId = null): bool
     {
         $query = ApartmentRental::where('apartment_id', $apartmentId)
             ->where('is_canceled', false);
@@ -35,20 +36,24 @@ class RentalService
         return $overlapExists;
     }
     
-    public function areDatesSameAsCurrent(int $rentalId, string $startDate, string $endDate): bool
+    public function areDatesSameAsCurrent(int $rentalId, DateTime $startDate, DateTime $endDate): bool
     {
         $rental = ApartmentRental::find($rentalId);
         
         if (!$rental) {
             return false;
         }
+        $currentStartDate = new \DateTime($rental->rental_start_date);
+        $currentEndDate = new \DateTime($rental->rental_end_date);
         
-        $newStartDate = Carbon::parse($startDate)->toDateString();
-        $newEndDate = Carbon::parse($endDate)->toDateString();
-        $currentStartDate = Carbon::parse($rental->rental_start_date)->toDateString();
-        $currentEndDate = Carbon::parse($rental->rental_end_date)->toDateString();
-        
-        return $newStartDate === $currentStartDate && 
-               $newEndDate === $currentEndDate;
+        return $startDate->format('Y/m/d') === $currentStartDate->format('Y/m/d') 
+        && $endDate->format('Y/m/d') === $currentEndDate->format('Y/m/d');
+    }
+
+    public function calculateTotalPrice(int $apartmentId, int $numberOfDays): float
+    {
+        $apartmentDetail = ApartmentDetail::where('apartment_id', $apartmentId)->first();
+        $dailyRate = $apartmentDetail->rent_price_per_night;
+         return $dailyRate * $numberOfDays;
     }
 }

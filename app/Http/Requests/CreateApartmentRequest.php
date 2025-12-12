@@ -33,7 +33,7 @@ class CreateApartmentRequest extends FormRequest
             'number_of_bedrooms' => 'required|integer|min:1|max:20',
             'number_of_bathrooms' => 'required|integer|min:1|max:20',
             'area_sq_meters' => 'required|numeric|min:50',
-            'rent_price' => 'required|numeric|min:0',
+            'rent_price_per_night' => 'required|numeric|min:0',
             'description_ar' => 'required|string',
             'description_en' => 'required|string',
             'has_balcony' => 'required|boolean',

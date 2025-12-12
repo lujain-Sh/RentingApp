@@ -11,10 +11,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::put('/user/rentals/{rental_id}/update',[ApartmentRentalController::class,'updateRental'])->middleware('auth:sanctum');
 
 Route::prefix('/user')->group(function()
 {
+    Route::put('/rentals/{rental_id}/update',[ApartmentRentalController::class,'updateRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');

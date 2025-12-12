@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('number_of_bedrooms');
             $table->integer('number_of_bathrooms');
             $table->integer('area_sq_meters');
-            $table->decimal('rent_price', 10, 2);
+            $table->decimal('rent_price_per_night', 10, 2);
             $table->text('description_ar');
             $table->text('description_en');
             $table->boolean('has_balcony');

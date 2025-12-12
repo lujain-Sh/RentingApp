@@ -13,7 +13,7 @@ class ApartmentDetail extends Model
         'number_of_bedrooms',
         'number_of_bathrooms',
         'area_sq_meters',
-        'rent_price',
+        'rent_price_per_night',
         'description_ar',
         'description_en',
         'has_balcony',

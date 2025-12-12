@@ -23,14 +23,16 @@ class ApartmentRentalController extends Controller
         $validatedData=$request->validated();
         $validatedData['user_id']=$user_id;
         $validatedData['apartment_id'] = $apartment_id;
-        $startDate = $validatedData['rental_start_date'];
-        $endDate = $validatedData['rental_end_date'];
+        $startDate = new \DateTime($validatedData['rental_start_date']);
+        $endDate = new \DateTime($validatedData['rental_end_date']);
+        $numberOfDays = $endDate->diff($startDate)->days + 1;
 
         if ($this->rentalService->checkOverlapForCreate($apartment_id, $startDate, $endDate)) {
             return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
         }
+        $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($apartment_id, $numberOfDays);
         $rental=ApartmentRental::create($validatedData);
-        return response()->json(['message'=>'rental created successfully','rental_id'=>$rental->id,],201);
+        return response()->json(['message'=>'rental created successfully','rental_id'=>$rental->id],201);
     }
 
     public function cancelRental($rental_id)
@@ -53,8 +55,10 @@ class ApartmentRentalController extends Controller
         $user_id=Auth::user()->id;
         $rental = $this->getUserRental($rental_id, $user_id);
         $validatedData=$request->validated();
-        $startDate = $validatedData['rental_start_date'];
-        $endDate = $validatedData['rental_end_date'];
+        $startDate = new \DateTime($validatedData['rental_start_date']);
+        $endDate = new \DateTime($validatedData['rental_end_date']);
+        $numberOfDays = $endDate->diff($startDate)->days + 1;
+        $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($rental->apartment_id, $numberOfDays);
         
         if (!$rental) {
             return response()->json(['message' => 'Rental not found',], 404);
@@ -62,10 +66,13 @@ class ApartmentRentalController extends Controller
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot update a canceled rental',],422);
         }
-        if ($this->rentalService->areDatesSameAsCurrent($rental->id, $startDate, $endDate)) {
+        if($rental->is_admin_approved){
+            return response()->json(['message'=>'cannot update an approved rental',],422);
+        }
+        if ($this->rentalService->areDatesSameAsCurrent($rental_id, $startDate, $endDate)) {
             return response()->json(['message' => 'Rental dates are unchanged'], 200);
         }
-        if ($this->rentalService->checkOverlapForUpdate($rental->apartment_id,$startDate,$endDate,$rental->id)) {
+        if ($this->rentalService->checkOverlapForUpdate($rental->apartment_id,$startDate,$endDate,$rental_id)) {
             return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
         }
         $rental->update($validatedData);
@@ -81,8 +88,7 @@ class ApartmentRentalController extends Controller
 
     public function getUserRentals()
     {
-        $user_id = Auth::user()->id;
-        $rentals = ApartmentRental::where('user_id', $user_id)->get();
+        $rentals = Auth::user()->rentals;
         return response()->json($rentals, 200);
     }
 
