@@ -16,6 +16,9 @@ class Address extends Model
         'floor',
         'apartment_number',
     ];   
+
+    protected $hidden = ['updated_at', 'created_at','id'];
+    
     public function apartment()
     {
         return $this->hasOne(Apartment::class, 'address_id');

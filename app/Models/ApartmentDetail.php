@@ -18,6 +18,8 @@ class ApartmentDetail extends Model
         'description_en',
         'has_balcony',
     ];
+    protected $hidden = ['apartment_id', 'updated_at', 'created_at','id'];
+    
     public function apartment()
     {
         return $this->belongsTo(Apartment::class, 'apartment_id');

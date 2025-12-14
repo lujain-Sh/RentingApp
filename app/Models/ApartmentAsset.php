@@ -12,6 +12,8 @@ class ApartmentAsset extends Model
         'apartment_id',
         'asset_url',
     ];
+
+    protected $hidden = ['apartment_id', 'updated_at', 'created_at','id'];
     public function apartment()
     {
         return $this->belongsTo(Apartment::class, 'apartment_id');

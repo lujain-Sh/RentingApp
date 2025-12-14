@@ -12,6 +12,9 @@ class Apartment extends Model
         'address_id',
         'is_active',
     ];
+    protected $with = ['address', 'details', 'assets'];
+
+    protected $hidden = ['user_id', 'address_id', 'updated_at', 'created_at','id'];
 
     public function details()
     {
