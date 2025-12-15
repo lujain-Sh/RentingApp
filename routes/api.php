@@ -25,18 +25,6 @@ Route::prefix('/user')->group(function()
 });
 
 
-Route::prefix('/admin')->group(function()
-{
-    Route::get('/users',[AdminController::class,'index']);
-    Route::get('/users/{id}',[AdminController::class,'show']);
-    Route::get('/pending_users',[AdminController::class,'pending_users']);
-    Route::get('/approved_users',[AdminController::class,'approved_users']);
-
-    Route::put('/users/{id}/approve',[AdminController::class,'approveAccount']);
-    Route::put('/users/{id}/reject',[AdminController::class,'rejectAccount']);
-
-});
-
 Route::prefix('/apartments')->group(function()
 {
     Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
