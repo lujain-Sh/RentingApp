@@ -6,6 +6,7 @@ use App\Http\Requests\RegisterUserRequest;
 use App\Models\PhoneSensitive;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -13,10 +14,10 @@ class UserController extends Controller
     public function register(RegisterUserRequest $request)
     {
         $data = $request->validated();
-        $phone=PhoneSensitive::where('country_code', $data['country_code'])
+
+        $phone = PhoneSensitive::where('country_code', $data['country_code'])
                                 ->where('phone_number', $data['phone_number'])
                                 ->first();
-
         if($phone){
             $exists = User::where('phone_sensitive_id', $phone->id)
                         ->where('is_active', true)
@@ -25,12 +26,19 @@ class UserController extends Controller
             if($exists){
                 return response()->json([
                     'message'=>'phone number already in use !',
-                ],422);//or 409 conflict
-                    }
+                ],409);
+            }
         }
-
         $phone_id  = PhoneSensitive::getOrCreate($data['country_code'],$data['phone_number']);
         
+        $request->validate([
+            'legal_doc'   =>'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'legal_photo' =>'required|file|mimes:jpg,jpeg,png|max:2048',
+        ]);
+        if($request->hasFile('legal_doc') && $request->hasFile('legal_photo')){            
+            $data['legal_doc_url'] = $request->file('legal_doc')->store('legal_docs','public');
+            $data['legal_photo_url'] = $request->file('legal_photo')->store('legal_photos','public');
+        }
 
          $user = User::create([
             'first_name' => $data['first_name'],
@@ -64,7 +72,7 @@ class UserController extends Controller
                                 ->first();
 
         if(!$phone){
-            return response()->json(['message' => 'Invalid phone number'], 404);
+            return response()->json(['message' => 'Invalid phone number'],401);
         }
 
         $user = User::where('phone_sensitive_id', $phone->id)
@@ -79,11 +87,14 @@ class UserController extends Controller
             return response()->json(['message' => 'Invalid password'], 401);
         }
 
-        if(!$user->is_admin_validated){
-            return response()->json(['message' => 'Admin has not approved your account yet'], 403);
-        }
-
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        if(!$user->is_admin_validated){
+            return response()->json([
+                'message' => 'Admin has not approved your account yet',
+                'token'   => $token
+            ], 403);
+        }
 
         return response()->json([
             'message' => 'Logged in successfully',
@@ -98,5 +109,20 @@ class UserController extends Controller
         return response()->json([
             'message'=>'logged out successfully !'
         ],200);
+    }
+
+    public function checkApprove(){
+        $user = Auth::user();
+        if($user->is_admin_validated){
+            return response()->json([
+                'message'=>'User is approved by admin.',
+                'is_approved' => true,
+            ],200);
+        }else{
+            return response()->json([
+                'message'=>'User is not approved by admin yet.',
+                'is_approved' => false,
+            ],403);
+        }
     }
 }
