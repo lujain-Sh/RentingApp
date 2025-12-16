@@ -39,7 +39,8 @@ class CreateApartmentRequest extends FormRequest
             'has_balcony' => 'required|boolean',
 
             'assets' => 'required|array|min:1', // later to put dafault pic if all failed
-            'assets.*' => 'required|url',
+            // 'assets.*' => 'required|url',
+            'assets.*' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }

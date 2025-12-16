@@ -6,8 +6,6 @@ use App\Http\Requests\CreateApartmentRequest;
 use App\Http\Requests\FilterApartmentRequest;
 use App\Models\Address;
 use App\Models\Apartment;
-use App\Models\ApartmentAsset;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,8 +13,8 @@ class ApartmentController extends Controller
 {
     public function create_apartment(CreateApartmentRequest $request)
     {
-        $user=Auth::user();
-        $data=$request->validated();
+        $user = Auth::user();
+        $data = $request->validated();
 
         $address = Address::where('governorate', $data['governorate'])
             ->where('city', $data['city'])
@@ -55,18 +53,18 @@ class ApartmentController extends Controller
                 'has_balcony' => $data['has_balcony'],
             ]);
 
-            foreach ($data['assets'] as $url) {
-                try{
-                    ApartmentAsset::create([
+            foreach ($data['assets'] as $asset) {
+                try {
+                    $path = $asset->store('apartment_assets', 'public');
+                    $apartment->assets()->create([
                         'apartment_id' => $apartment->id,
-                        'asset_url' => $url,
+                        'asset_url' => $path,
                     ]);
-                }
-                catch(\Exception $e){
-                    $failedAssets[] = $url;
+                } catch (\Exception $e) {
+                    $failedAssets[] = $asset->getClientOriginalName();
                 }
             }
-
+            
             return response()->json([
                 'message' => 'Apartment listed successfully',
                 // 'apartment_id' => $apartment->id,
