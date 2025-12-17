@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ApartmentRentalController extends Controller
 {
+    //edit update migrate
+    //get landloard rentals
     protected $rentalService;
     
     public function __construct(RentalService $rentalService)
@@ -66,7 +68,7 @@ class ApartmentRentalController extends Controller
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot update a canceled rental',],422);
         }
-        if($rental->is_admin_approved){
+        if($rental->is_landlord_approved){
             return response()->json(['message'=>'cannot update an approved rental',],422);
         }
         if ($this->rentalService->areDatesSameAsCurrent($rental_id, $startDate, $endDate)) {
@@ -98,7 +100,7 @@ class ApartmentRentalController extends Controller
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot approve a canceled rental',],422);
         }
-        $rental->update(['is_admin_approved' => true]);
+        $rental->update(['is_landlord_approved' => true]);
         return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
@@ -111,10 +113,10 @@ class ApartmentRentalController extends Controller
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot reject a canceled rental',],422);
         }
-        if($rental->is_admin_approved){
+        if($rental->is_landlord_approved){
             return response()->json(['message'=>'cannot reject an approved rental',],422);
         }
-        $rental->update(['is_admin_approved' => false]);
+        $rental->update(['is_landlord_approved' => false]);
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);

@@ -22,8 +22,8 @@ class RentalService
     private function checkOverlap(int $apartmentId, DateTime $startDate, DateTime $endDate, ?int $excludeRentalId = null): bool
     {
         $query = ApartmentRental::where('apartment_id', $apartmentId)
-            ->where('is_canceled', false);
-        
+            ->where('is_canceled', false)
+            ->where('is_landlord_approved', true);
         if ($excludeRentalId !== null) {
             $query->where('id', '!=', $excludeRentalId);
         }

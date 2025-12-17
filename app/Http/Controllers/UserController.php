@@ -56,6 +56,7 @@ class UserController extends Controller
             'message' => 'User registered successfully',
             'user_id' => $user->id,
             'phone_id' => $phone_id,
+            'user' => $user,
         ], 201);
     }
 
@@ -111,8 +112,12 @@ class UserController extends Controller
         ],200);
     }
 
-    public function checkApprove(){
-        $user = Auth::user();
+    public function checkApprove(Request $request){
+        $request->validate([
+            'full_phone_str' => 'required|string|1ength:13',
+        ]);
+        $phone = PhoneSensitive::where('full_phone_str', $request->full_phone_str)->first();
+        $user = User::where('phone_sensitive_id', $phone->id)->first();
         if($user->is_admin_validated){
             return response()->json([
                 'message'=>'User is approved by admin.',

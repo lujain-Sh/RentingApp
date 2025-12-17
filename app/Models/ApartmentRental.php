@@ -14,7 +14,7 @@ class ApartmentRental extends Model
         'rental_start_date',
         'rental_end_date',
         'is_canceled',
-        'is_admin_approved',
+        'is_landlord_approved',
         'total_rental_price',
     ];
 
