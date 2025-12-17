@@ -114,7 +114,7 @@ class UserController extends Controller
 
     public function checkApprove(Request $request){
         $request->validate([
-            'full_phone_str' => 'required|string|1ength:13',
+            'full_phone_str' => 'required|string|length:13',
         ]);
         $phone = PhoneSensitive::where('full_phone_str', $request->full_phone_str)->first();
         $user = User::where('phone_sensitive_id', $phone->id)->first();
