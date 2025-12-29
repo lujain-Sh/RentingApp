@@ -14,7 +14,7 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
-     *
+     * 
      * @var list<string>
      */
 
@@ -51,6 +51,13 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            // it's me dana again :)
+            // 'birth_date' => 'date',
+
+            // 'is_phone_number_validated' => 'boolean',
+            // 'is_active' => 'boolean',
+            // 'is_admin_validated' => 'boolean',
+
             // 'email_verified_at' => 'datetime',
             // 'password' => 'hashed',
         ];
@@ -80,6 +87,10 @@ class User extends Authenticatable
     public function rentals()
     {
         return $this->hasMany(ApartmentRental::class, 'user_id');
+    }
+    public function ratings()
+    {
+        return $this->hasMany(ApartmentRating::class, 'user_id');
     }
 
 }

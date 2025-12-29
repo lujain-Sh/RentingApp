@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('apartments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            // it's me Dana shouldn't we do the address as unique to avoid duplicates ?
             $table->foreignId('address_id')->constrained('addresses');
             $table->integer('is_active')->default(true); 
+            // $table->foreignId('apartment_rating_id')->nullable()->constrained('apartment_ratings');
             $table->timestamps();
         });
     }

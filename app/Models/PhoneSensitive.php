@@ -13,6 +13,9 @@ class PhoneSensitive extends Model
         'full_phone_str',
     ];
 
+    
+    // chat gpt says this function shouldn't be returning an id it should be returning an instance of phoneSensitive as for clarity
+    // but i won't change it for now until i ask you both so you don't kill me :)
     public static function getOrCreate($country_code, $phone_number)
     {
         $phone = self::where('country_code', $country_code)

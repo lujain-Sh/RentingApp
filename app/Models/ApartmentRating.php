@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class ApartmentRating extends Model
+{
+    use HasFactory;
+
+    protected $table = 'apartment_ratings';
+
+    protected $fillable = [
+        'apartment_id',
+        'user_id',
+        'apartment_rental_id',
+        'rating',
+        'comment',
+    ];
+
+    public function user() { 
+        return $this->belongsTo(User::class); 
+    }
+    public function rental() { 
+        return $this->belongsTo(ApartmentRental::class, 'apartment_rental_id');
+    }
+    public function apartment() { 
+        return $this->belongsTo(Apartment::class); 
+    }
+}

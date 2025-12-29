@@ -27,4 +27,9 @@ class ApartmentRental extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function rating()
+    {
+        return $this->hasOne(ApartmentRating::class, 'apartment_rental_id');
+    }
 }

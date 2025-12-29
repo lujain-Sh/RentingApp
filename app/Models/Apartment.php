@@ -12,9 +12,9 @@ class Apartment extends Model
         'address_id',
         'is_active',
     ];
-    protected $with = ['address', 'details', 'assets'];
+    protected $with = ['address', 'details', 'assets', 'ratings'];
 
-    protected $hidden = ['user_id', 'address_id', 'updated_at', 'created_at','id'];
+    protected $hidden = ['user_id', 'address_id', 'updated_at', 'created_at'/*,'id'*/];
 
     public function details()
     {
@@ -34,7 +34,16 @@ class Apartment extends Model
     }
     public function rentals()
     {
-        return $this->hasMany(ApartmentRental::class, 'apartment_id');
+        return $this->hasMany(ApartmentRental::class, 'apartment_id'); // this key helps to specify the foreign key to 
+    }
+    public function ratings()
+    {
+        return $this->hasMany(ApartmentRating::class, 'apartment_id');
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
     }
     
 }
