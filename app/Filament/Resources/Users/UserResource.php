@@ -9,9 +9,13 @@ use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Dom\Text;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
@@ -28,10 +32,27 @@ class UserResource extends Resource
     }
 
     public static function table(Table $table): Table
-    {
-        return UsersTable::configure($table);
-    }
-
+{
+    return $table->columns([
+        ImageColumn::make('legal_photo_url')
+            ->label('personal_photo')
+            ->disk('public') 
+            ->circular() ,
+        TextColumn::make('first_name')
+            ->searchable()->size('md'),
+        TextColumn::make('last_name')
+            ->searchable(),
+        
+        TextColumn::make('full_phone_str')
+            ->label('phone_number')
+            ->searchable(),
+        TextColumn::make('birth_date')
+            ->date(),
+        ImageColumn::make('legal_doc_url')
+            ->label('legal_document')
+            ->disk('public'), 
+    ]);
+}
     public static function getRelations(): array
     {
         return [
