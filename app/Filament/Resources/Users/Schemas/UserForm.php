@@ -32,10 +32,10 @@ class UserForm
                 // // TextInput::make('password')
                 //     ->password()
                 //     ->required(),
-                Toggle::make('is_phone_number_validated')
-                    ->required(),
-                Toggle::make('is_active')
-                    ->required(),
+                // Toggle::make('is_phone_number_validated')
+                //     ->required(),
+                // Toggle::make('is_active')
+                //     ->required(),
                 Toggle::make('is_admin_validated'),
             ]);
     }

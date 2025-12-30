@@ -10,9 +10,12 @@ use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
 use Dom\Text;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -33,25 +36,60 @@ class UserResource extends Resource
 
     public static function table(Table $table): Table
 {
-    return $table->columns([
+    return $table->recordUrl(null) 
+
+    ->columns([
         ImageColumn::make('legal_photo_url')
-            ->label('personal_photo')
+            ->label('personal photo')
             ->disk('public') 
-            ->circular() ,
+            ->circular() 
+            ->alignCenter()
+            ->size(60, 60)
+            ->url(fn ($record) => asset('storage/' . $record->legal_photo_url))
+            ->openUrlInNewTab(),
+
         TextColumn::make('first_name')
-            ->searchable()->size('md'),
+            ->label('first name')
+            ->alignCenter()
+            ->searchable(),
+
         TextColumn::make('last_name')
+            ->label('last name')
+            ->alignCenter()
             ->searchable(),
         
         TextColumn::make('full_phone_str')
-            ->label('phone_number')
+            ->label('phone number')
+            ->alignCenter()
             ->searchable(),
+
         TextColumn::make('birth_date')
+            ->label('birth date')
+            ->alignCenter()
             ->date(),
+
         ImageColumn::make('legal_doc_url')
-            ->label('legal_document')
-            ->disk('public'), 
-    ]);
+            ->label('legal document')
+            ->disk('public')
+            ->alignCenter()
+            ->size(60, 40)
+            ->url(fn ($record) => asset('storage/' . $record->legal_doc_url))
+            ->openUrlInNewTab(),
+
+        IconColumn::make('is_active')
+            ->label('is active')
+            ->alignCenter()
+            ->boolean(),
+        IconColumn::make('is_admin_validated')
+            ->label('is admin validated')
+            ->alignCenter()
+            ->boolean(),
+    ])
+    ->actions([
+            EditAction::make(),
+            DeleteAction::make(),
+        ])
+    ;
 }
     public static function getRelations(): array
     {
