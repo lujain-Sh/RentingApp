@@ -63,8 +63,8 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'country_code' => 'required|string',
-            'phone_number' => 'required|string',
+            'country_code' => 'required|string|size:4',
+            'phone_number' => 'required|string|size:9|regex:/^[0-9]+$/',
             'password'     => 'required|string',
         ]);
 
@@ -114,10 +114,19 @@ class UserController extends Controller
 
     public function checkApprove(Request $request){
         $request->validate([
-            'full_phone_str' => 'required|string|length:13',
+            'full_phone_str' => 'required|string|size:13',
         ]);
         $phone = PhoneSensitive::where('full_phone_str', $request->full_phone_str)->first();
+        
+        if (!$phone) {
+            return response()->json([
+                'message' => 'Phone number not found',
+                'is_approved' => false,
+            ], 404);
+        }
+
         $user = User::where('phone_sensitive_id', $phone->id)->first();
+        
         if($user->is_admin_validated){
             return response()->json([
                 'message'=>'User is approved by admin.',

@@ -52,7 +52,7 @@ class ApartmentRentalController extends Controller
         return response()->json(['message'=>'rental cancelled successfully',],200);
     }
 
-    public function updateRental(UpdateRentalRequest $request,$rental_id)
+    public function updateRental(UpdateRentalRequest $request, $rental_id)
     {
         $user_id=Auth::user()->id;
         $rental = $this->getUserRental($rental_id, $user_id);
@@ -97,19 +97,23 @@ class ApartmentRentalController extends Controller
     public function approveRental($rental_id)
     {
         $rental=ApartmentRental::findOrFail($rental_id);
+        if(!$rental){
+            return response()->json(['message'=>'rental not found',],404);
+        }
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot approve a canceled rental',],422);
         }
         $rental->update(['is_landlord_approved' => true]);
         return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
-        if(!$rental){
-            return response()->json(['message'=>'rental not found',],404);
-        }
     }
 
     public function rejectRental($rental_id)
     {
         $rental=ApartmentRental::findOrFail($rental_id);
+
+        if(!$rental){
+            return response()->json(['message'=>'rental not found',],404);
+        }
         if($rental->is_canceled){
             return response()->json(['message'=>'cannot reject a canceled rental',],422);
         }
@@ -118,9 +122,6 @@ class ApartmentRentalController extends Controller
         }
         $rental->update(['is_landlord_approved' => false]);
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
-        if(!$rental){
-            return response()->json(['message'=>'rental not found',],404);
-        }
     }
 
 
