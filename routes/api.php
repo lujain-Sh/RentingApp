@@ -36,7 +36,6 @@ Route::prefix('/apartments')->group(function()
     Route::get('/{id}', [ApartmentController::class, 'show']);
     Route::get('/{id}/ratings', [ApartmentRatingController::class, 'listByApartment']);
     Route::post('/rentals/{rental_id}/ratings', [ApartmentRatingController::class, 'createRating'])->middleware('auth:sanctum');
+    Route::post('/{update_request_id}/rentals/approve',[ApartmentRentalController::class,'approveRentalUpdate'])->middleware('auth:sanctum');
+    Route::post('/{update_request_id}/rentals/reject',[ApartmentRentalController::class,'rejectRentalUpdate'])->middleware('auth:sanctum');
 });
-
-// u1: 1|BYXYx2RH8Z92Kuck2Orsxq9sqrt8aS8GKQEeosRo548b8a49
-// dana: 2|gNsxTeHuwj6Mcqb0IsvGrv8i8I0x5xOJyVZdwAJgd8ec9508

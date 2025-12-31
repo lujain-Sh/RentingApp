@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ApartmentDetail;
 use App\Models\ApartmentRental;
+use App\Models\RentalUpdateRequest;
 use DateTime;
 
 class RentalService
@@ -55,5 +56,53 @@ class RentalService
         $apartmentDetail = ApartmentDetail::where('apartment_id', $apartmentId)->first();
         $dailyRate = $apartmentDetail->rent_price_per_night;
          return $dailyRate * $numberOfDays;
+    }
+
+    public function createUpdateRequest(ApartmentRental $rental, array $data): RentalUpdateRequest
+    {
+        if ($rental->pendingUpdateRequest) {
+            throw new \Exception('A pending update request already exists.');
+        }
+
+        return RentalUpdateRequest::create([
+            'apartment_rental_id' => $rental->id,
+            'requested_start_date' => $data['rental_start_date'],
+            'requested_end_date' => $data['rental_end_date'],
+            'requested_total_price' => $data['total_rental_price'],
+            'status' => 'pending',
+            'current_start_date' => $rental->rental_start_date,
+            'current_end_date' => $rental->rental_end_date,
+        ]);
+    }
+
+    public function applyUpdateRequest(RentalUpdateRequest $updateRequest): ApartmentRental
+    {
+        $rental = $updateRequest->rental;
+        
+        $rental->update([
+            'rental_start_date' => $updateRequest->requested_start_date,
+            'rental_end_date' => $updateRequest->requested_end_date,
+            'total_rental_price' => $updateRequest->requested_total_price,
+        ]);
+
+        $updateRequest->update(['status' => 'approved']);
+        
+        return $rental->fresh();
+    }
+
+    public function rejectUpdateRequest(RentalUpdateRequest $updateRequest): RentalUpdateRequest
+    {
+        $updateRequest->update([
+            'status' => 'rejected',
+        ]);
+        
+        return $updateRequest->fresh();
+    }
+
+    public function hasPendingUpdateRequest(int $rental_id): bool
+    {
+        return RentalUpdateRequest::where('apartment_rental_id', $rental_id)
+            ->where('status', 'pending')
+            ->exists();
     }
 }

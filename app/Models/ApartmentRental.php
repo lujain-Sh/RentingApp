@@ -32,4 +32,15 @@ class ApartmentRental extends Model
     {
         return $this->hasOne(ApartmentRating::class, 'apartment_rental_id');
     }
+
+     public function updateRequests()
+    {
+        return $this->hasMany(RentalUpdateRequest::class, 'apartment_rental_id');
+    }
+
+    public function pendingUpdateRequest()
+    {
+        return $this->hasOne(RentalUpdateRequest::class, 'apartment_rental_id')
+                    ->where('status', 'pending');
+    }
 }
