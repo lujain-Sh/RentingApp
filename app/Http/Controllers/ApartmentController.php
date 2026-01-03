@@ -98,66 +98,74 @@ class ApartmentController extends Controller
 
     
     public function filterApartment(FilterApartmentRequest $request)
-{
-    $data = $request->validated();
-    
-    $query = Apartment::query()->where('is_active', 1);
+    {
+        $data = $request->validated();
+        
+        $query = Apartment::query()->where('is_active', 1);
 
-    $query->when($data['governorate'] ?? null, function ($q, $governorate) {
-        $q->whereHas('address', fn ($a) =>
-            $a->where('governorate', $governorate)
-        );
-    });
-
-    $query->when($data['city'] ?? null, function ($q, $cityName) {
-        $q->whereHas('address.city', fn ($c) =>
-            $c->where('name', $cityName)
-        );
-    });
-
-    $query->when(
-        isset($data['min_price']) || isset($data['max_price']),
-        function ($q) use ($data) {
-            $q->whereHas('details', fn ($d) =>
-                $d->whereBetween(
-                    'rent_price_per_night',
-                    [
-                        $data['min_price'] ?? 0,
-                        $data['max_price'] ?? PHP_INT_MAX
-                    ]
-                )
+        $query->when($data['governorate'] ?? null, function ($q, $governorate) {
+            $q->whereHas('address', fn ($a) =>
+                $a->where('governorate', $governorate)
             );
-        }
-    );
+        });
 
-    $query->when($data['bedrooms'] ?? null, fn ($q, $v) =>
-        $q->whereHas('details', fn ($d) => $d->where('number_of_bedrooms', $v))
-    );
-
-    $query->when($data['bathrooms'] ?? null, fn ($q, $v) =>
-        $q->whereHas('details', fn ($d) => $d->where('number_of_bathrooms', $v))
-    );
-
-    $query->when(
-        isset($data['min_area']) || isset($data['max_area']),
-        function ($q) use ($data) {
-            $q->whereHas('details', fn ($d) =>
-                $d->whereBetween(
-                    'area_sq_meters',
-                    [
-                        $data['min_area'] ?? 0,
-                        $data['max_area'] ?? PHP_INT_MAX
-                    ]
-                )
+        $query->when($data['city'] ?? null, function ($q, $cityName) {
+            $q->whereHas('address.city', fn ($c) =>
+                $c->where('name', $cityName)
             );
-        }
-    );
-    
-    $query->when($data['has_balcony'] ?? null, fn ($q, $v) =>
-        $q->whereHas('details', fn ($d) => $d->where('has_balcony', $v))
-    );
+        });
 
-    return response()->json($query->get(), 200);
-}
+        $query->when(
+            isset($data['min_price']) || isset($data['max_price']),
+            function ($q) use ($data) {
+                $q->whereHas('details', fn ($d) =>
+                    $d->whereBetween(
+                        'rent_price_per_night',
+                        [
+                            $data['min_price'] ?? 0,
+                            $data['max_price'] ?? PHP_INT_MAX
+                        ]
+                    )
+                );
+            }
+        );
+
+        $query->when($data['bedrooms'] ?? null, fn ($q, $v) =>
+            $q->whereHas('details', fn ($d) => $d->where('number_of_bedrooms', $v))
+        );
+
+        $query->when($data['bathrooms'] ?? null, fn ($q, $v) =>
+            $q->whereHas('details', fn ($d) => $d->where('number_of_bathrooms', $v))
+        );
+
+        $query->when(
+            isset($data['min_area']) || isset($data['max_area']),
+            function ($q) use ($data) {
+                $q->whereHas('details', fn ($d) =>
+                    $d->whereBetween(
+                        'area_sq_meters',
+                        [
+                            $data['min_area'] ?? 0,
+                            $data['max_area'] ?? PHP_INT_MAX
+                        ]
+                    )
+                );
+            }
+        );
+        
+        $query->when($data['has_balcony'] ?? null, fn ($q, $v) =>
+            $q->whereHas('details', fn ($d) => $d->where('has_balcony', $v))
+        );
+
+        return response()->json(
+            $query->get()->map(fn ($apartment) => [
+                'apartment_id' => $apartment->id,
+                'address' => $apartment->address,
+                'price_per_night' => $apartment->details->rent_price_per_night,
+                'rate' => round($apartment->ratings()->avg('rating'),2),
+                'assets' => $apartment->assets->pluck('asset_url')->first(),
+            ])
+        , 200);
+    }
 
 }
