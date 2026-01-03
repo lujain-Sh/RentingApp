@@ -5,6 +5,7 @@ use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\ApartmentRatingController;
 use App\Http\Controllers\ApartmentRentalController;
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,4 +44,9 @@ Route::prefix('/apartments')->group(function()
 
 Route::prefix('governorates')->group(function() {
     Route::get('/{governorate}/cities', [CityController::class, 'byGovernorate']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/apartments/{id}/favorite', [FavoriteController::class, 'toggle']);
+    Route::get('/favorites', [FavoriteController::class, 'index']);
 });

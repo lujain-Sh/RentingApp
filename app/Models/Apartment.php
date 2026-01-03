@@ -46,4 +46,10 @@ class Apartment extends Model
         return $this->ratings()->avg('rating');
     }
     
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites')
+                    ->withTimestamps();
+    }
+
 }

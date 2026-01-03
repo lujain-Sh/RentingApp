@@ -92,5 +92,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(ApartmentRating::class, 'user_id');
     }
+    public function favorites()
+    {
+        return $this->belongsToMany(Apartment::class, 'favorites')
+                    ->withTimestamps();
+    }
 
 }

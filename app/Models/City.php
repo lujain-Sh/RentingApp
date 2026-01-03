@@ -12,11 +12,6 @@ class City extends Model
         'governorate',
     ];
 
-    public static function getCitiesByGovernorate(Governorate $governorate)
-    {
-        return self::where('governorate', $governorate->value)->get();
-    }
-    
     public static function getOrCreate($name, Governorate $governorate)
     {
         $city = self::where('name', $name)
