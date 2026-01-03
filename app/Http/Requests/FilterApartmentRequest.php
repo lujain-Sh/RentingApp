@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Governorate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class FilterApartmentRequest extends FormRequest
 {
@@ -22,7 +24,7 @@ class FilterApartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'governorate' => 'nullable|string',
+            'governorate' => ['nullable', Rule::enum(Governorate::class)],
             'city' => 'nullable|string',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Governorate;
 use App\Http\Requests\CreateApartmentRequest;
 use App\Http\Requests\FilterApartmentRequest;
 use App\Models\Address;
 use App\Models\Apartment;
+use App\Models\City;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,9 +17,14 @@ class ApartmentController extends Controller
     {
         $user = Auth::user();
         $data = $request->validated();
+        
+        $cityId = City::getOrCreate(
+            $data['city'],
+            Governorate::from($data['governorate'])
+        );
 
         $address = Address::where('governorate', $data['governorate'])
-            ->where('city', $data['city'])
+            ->where('city_id', $cityId)
             ->where('street', $data['street'])
             ->where('building_number', $data['building_number'])
             ->where('floor', $data['floor'])
@@ -27,11 +34,11 @@ class ApartmentController extends Controller
         if ($address) {
             return response()->json(['message' => 'Apartment with this address already exists'], 409);
         }
-        return DB::transaction(function() use ($data, $user) {
+        return DB::transaction(function() use ($cityId, $data, $user) {
             $failedAssets = [];
             $address = Address::create([
                 'governorate' => $data['governorate'],
-                'city' => $data['city'],
+                'city_id' => $cityId,
                 'street' => $data['street'],
                 'building_number' => $data['building_number'],
                 'floor' => $data['floor'],
@@ -89,95 +96,68 @@ class ApartmentController extends Controller
         return response()->json($apartment);
     }
 
-    public function filterApartment(FilterApartmentRequest $request) 
-    {
-        $data = $request->validated();
-        $query = Apartment::where('is_active', 1);
-        if($request->has('governorate')){
-            $query =  $this->filterByGovernorate($query , $data['governorate']);
-        }
-        if($request->has('city')){
-            $query = $this->filterByCity($query , $data['city']);
-        }
-        if($request->has('min_price') || $request->has('max_price')){
-            $query = $this->filterByPriceRange($query , $data['min_price'], $data['max_price']);
-        }
-        if($request->has('bedrooms')){
-            $query = $this->filterByNumberOfBedrooms($query , $data['bedrooms']);
-        }
-        if($request->has('bathrooms')){
-            $query = $this->filterByNumberOfBathrooms($query, $data['bathrooms']);
-        }
-        if($request->has('min_area') || $request->has('max_area')){
-            $query = $this->filterByArea($query , $data['min_area'], $data['max_area']);
-        }
-        if($request->has('has_balcony')){
-            $query = $this->filterByBalcony($query , $data['has_balcony']);
-        }
-        return response()->json($query->get(), 200);
-    }
-
     
-    private function filterByGovernorate($query, $governorate)
-    {
-        return $query->whereHas('address', function($q) use ($governorate) {
-            $q->where('governorate', $governorate);
-        });
-    }
+    public function filterApartment(FilterApartmentRequest $request)
+{
+    $data = $request->validated();
+    
+    $query = Apartment::query()->where('is_active', 1);
 
-    private function filterByCity($query, $city)
-    {
-        return $query->whereHas('address', function($q) use ($city) {
-            $q->where('city', $city);
-        });
-    }
+    $query->when($data['governorate'] ?? null, function ($q, $governorate) {
+        $q->whereHas('address', fn ($a) =>
+            $a->where('governorate', $governorate)
+        );
+    });
 
-    private function filterByPriceRange($query, $minPrice = 0, $maxPrice = PHP_INT_MAX)
-    {
-        if ($maxPrice === null) {
-            $maxPrice = PHP_INT_MAX;
+    $query->when($data['city'] ?? null, function ($q, $cityName) {
+        $q->whereHas('address.city', fn ($c) =>
+            $c->where('name', $cityName)
+        );
+    });
+
+    $query->when(
+        isset($data['min_price']) || isset($data['max_price']),
+        function ($q) use ($data) {
+            $q->whereHas('details', fn ($d) =>
+                $d->whereBetween(
+                    'rent_price_per_night',
+                    [
+                        $data['min_price'] ?? 0,
+                        $data['max_price'] ?? PHP_INT_MAX
+                    ]
+                )
+            );
         }
-        if ($minPrice === null) {
-            $minPrice = 0;
+    );
+
+    $query->when($data['bedrooms'] ?? null, fn ($q, $v) =>
+        $q->whereHas('details', fn ($d) => $d->where('number_of_bedrooms', $v))
+    );
+
+    $query->when($data['bathrooms'] ?? null, fn ($q, $v) =>
+        $q->whereHas('details', fn ($d) => $d->where('number_of_bathrooms', $v))
+    );
+
+    $query->when(
+        isset($data['min_area']) || isset($data['max_area']),
+        function ($q) use ($data) {
+            $q->whereHas('details', fn ($d) =>
+                $d->whereBetween(
+                    'area_sq_meters',
+                    [
+                        $data['min_area'] ?? 0,
+                        $data['max_area'] ?? PHP_INT_MAX
+                    ]
+                )
+            );
         }
-        
-        return $query->whereHas('details', function($q) use ($minPrice, $maxPrice) {
-            $q->whereBetween('rent_price_per_night', [$minPrice, $maxPrice]);
-        });
-    }
+    );
+    
+    $query->when($data['has_balcony'] ?? null, fn ($q, $v) =>
+        $q->whereHas('details', fn ($d) => $d->where('has_balcony', $v))
+    );
 
-    private function filterByNumberOfBedrooms($query, $bedrooms)
-    {
-        return $query->whereHas('details', function($q) use ($bedrooms) {
-            $q->where('number_of_bedrooms', $bedrooms);
-        });
-    }
+    return response()->json($query->get(), 200);
+}
 
-    private function filterByNumberOfBathrooms($query, $bathrooms)
-    {
-        return $query->whereHas('details', function($q) use ($bathrooms) {
-            $q->where('number_of_bathrooms', $bathrooms);
-        });
-    }
-
-    private function filterByArea($query, $minArea = 0, $maxArea = PHP_INT_MAX)
-    {
-        if ($maxArea === null) {
-            $maxArea = PHP_INT_MAX;
-        }
-        if ($minArea === null) {
-            $minArea = 0;
-        }
-        
-        return $query->whereHas('details', function($q) use ($minArea, $maxArea) {
-            $q->whereBetween('area_sq_meters', [$minArea, $maxArea]);
-        });
-    }
-
-    private function filterByBalcony($query, $hasBalcony)
-    {
-        return $query->whereHas('details', function($q) use ($hasBalcony) {
-            $q->where('has_balcony', $hasBalcony);
-        });
-    }
 }

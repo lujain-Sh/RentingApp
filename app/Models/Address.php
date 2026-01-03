@@ -10,7 +10,7 @@ class Address extends Model
 
     protected $fillable = [
         'governorate',
-        'city',
+        'city_id',
         'street',
         'building_number',
         'floor',
@@ -22,6 +22,10 @@ class Address extends Model
     public function apartment()
     {
         return $this->hasOne(Apartment::class, 'address_id');
+    }
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
     
 }

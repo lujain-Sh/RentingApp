@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Governorate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateApartmentRequest extends FormRequest
 {
@@ -22,8 +24,7 @@ class CreateApartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-
-            'governorate' => 'required|string|max:50',
+            'governorate' => ['required', Rule::enum(Governorate::class)],
             'city' => 'required|string|max:50',
             'street' => 'required|string|max:100',
             'building_number' => 'required|string|min:0',
