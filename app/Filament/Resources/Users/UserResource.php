@@ -37,6 +37,14 @@ class UserResource extends Resource
     public static function table(Table $table): Table
 {
     return $table->recordUrl(null) 
+    
+    ->defaultSort(fn ($query) => $query->orderByRaw("
+            CASE 
+                WHEN is_admin_validated IS NULL THEN 0 
+                WHEN is_admin_validated = 0 THEN 1 
+                ELSE 2 
+            END ASC
+        "))
 
     ->columns([
         ImageColumn::make('legal_photo_url')

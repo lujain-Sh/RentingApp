@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 AdminSeeder::class,
                 CitySeeder::class,
+                UserSeeder::class,
+                // user apartment apartment assests rental favorite 
                 // TestDataSeeder::class,
             ]);
 
