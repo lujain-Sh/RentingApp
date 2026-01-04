@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('rental_start_date');
             $table->date('rental_end_date');
+            $table->string('card_number');
             $table->boolean('is_landlord_approved')->nullable();
             $table->decimal('total_rental_price', 10, 2);
             $table->timestamps();

@@ -16,6 +16,7 @@ class ApartmentRental extends Model
         'is_canceled',
         'is_landlord_approved',
         'total_rental_price',
+        'card_number'
     ];
 
     public function apartment()

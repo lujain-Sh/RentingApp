@@ -27,6 +27,7 @@ class CreateRentalRequest extends FormRequest
             'rental_start_date' => 'required|date|date_format:Y/m/d|after_or_equal:today|before_or_equal:' . $oneYearFromNow . '|before_or_equal:rental_end_date',
             'rental_end_date' => 'required|date|date_format:Y/m/d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow, 
             'total_rental_price' => 'numeric|min:0',
+            'card_number' => 'required|digits_between:12,19'
         ];
     }
 }
