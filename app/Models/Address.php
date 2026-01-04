@@ -17,7 +17,11 @@ class Address extends Model
         'apartment_number',
     ];   
 
-    protected $hidden = ['updated_at', 'created_at','id'];
+    // adding city name too
+    // protected $with = ['city']; // i guess u can edit city too to only return name
+    
+    protected $hidden = ['updated_at', 'created_at','id']; // city_id
+
     
     public function apartment()
     {

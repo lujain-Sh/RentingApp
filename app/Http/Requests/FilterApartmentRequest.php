@@ -25,7 +25,7 @@ class FilterApartmentRequest extends FormRequest
     {
         return [
             'governorate' => ['nullable', Rule::enum(Governorate::class)],
-            'city' => 'nullable|string',
+            'city' => 'nullable|string|exists:cities,name',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
             'bedrooms' => 'nullable|integer|min:1',

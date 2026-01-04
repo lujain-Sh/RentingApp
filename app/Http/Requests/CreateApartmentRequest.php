@@ -25,7 +25,7 @@ class CreateApartmentRequest extends FormRequest
     {
         return [
             'governorate' => ['required', Rule::enum(Governorate::class)],
-            'city' => 'required|string|max:50',
+            'city' => 'required|string|exists:cities,name',
             'street' => 'required|string|max:100',
             'building_number' => 'required|string|min:0',
             'floor' => 'required|integer|min:0',

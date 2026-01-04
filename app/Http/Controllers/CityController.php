@@ -12,8 +12,9 @@ class CityController extends Controller
     {
         return response()->json(
             City::where('governorate', $governorate)
-                ->pluck('name'),
-            200
-        );
+                    ->orderBy('name')
+                    ->pluck('name'),
+            200);
+
     }
 }
