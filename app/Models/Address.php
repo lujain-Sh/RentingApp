@@ -17,10 +17,10 @@ class Address extends Model
         'apartment_number',
     ];   
 
-    // adding city name too
-    // protected $with = ['city']; // i guess u can edit city too to only return name
-    
-    protected $hidden = ['updated_at', 'created_at','id']; // city_id
+
+    protected $appends = ['city'];
+    protected $hidden = ['cityRelation','updated_at', 'created_at','id']; //city_id
+
 
     
     public function apartment()
@@ -32,4 +32,14 @@ class Address extends Model
         return $this->belongsTo(City::class);
     }
     
+     public function getCityAttribute()
+    {
+        return $this->cityRelation?->name;
+    }
+
+    // Rename relation to avoid collision
+    public function cityRelation()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
 }

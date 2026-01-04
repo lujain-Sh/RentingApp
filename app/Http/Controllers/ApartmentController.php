@@ -75,7 +75,7 @@ class ApartmentController extends Controller
             return response()->json([
                 'message' => 'Apartment listed successfully',
                 // 'apartment_id' => $apartment->id,
-                'apartment' => Apartment::find($apartment->id),
+                // 'apartment' => Apartment::find($apartment->id),
                 'failed_assets' => $failedAssets
             ], 201);
         });
