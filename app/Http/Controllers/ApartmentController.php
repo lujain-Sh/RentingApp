@@ -93,7 +93,10 @@ class ApartmentController extends Controller
         if(!$apartment || !$apartment->is_active){
             return response()->json(['message'=>'Apartment not found'],404);
         }
-        return response()->json($apartment);
+        return response()->json([
+            'apartment'=>$apartment,
+            'rate'=>round($apartment->ratings()->avg('rating'),2)
+        ]);
     }
 
     

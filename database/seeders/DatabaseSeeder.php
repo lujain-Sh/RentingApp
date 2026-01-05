@@ -21,7 +21,9 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
                 ApartmentSeeder::class,
                 ApartmentAssetSeeder::class,
-                // user apartment apartment assests rental favorite 
+                RentalSeeder::class,
+                FavoriteSeeder::class,
+                RatingSeeder::class,
                 // TestDataSeeder::class,
             ]);
 
