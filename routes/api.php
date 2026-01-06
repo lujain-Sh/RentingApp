@@ -31,9 +31,10 @@ Route::prefix('/user')->group(function()
 
 Route::prefix('/apartments')->group(function()
 {
+
+    Route::get('/', [ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
     Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
     Route::post('/create',[ApartmentController::class,'create_apartment'])->middleware('auth:sanctum');
-    Route::get('/', [ApartmentController::class, 'index']);
     Route::get('/filter', [ApartmentController::class, 'filterApartment']);
     Route::get('/{id}', [ApartmentController::class, 'show']);
     Route::get('/{id}/ratings', [ApartmentRatingController::class, 'listByApartment']);

@@ -8,11 +8,18 @@ use App\Http\Requests\FilterApartmentRequest;
 use App\Models\Address;
 use App\Models\Apartment;
 use App\Models\City;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ApartmentController extends Controller
 {
+    public function myApartments()
+    {
+        $user = Auth::user();
+        return response()->json(Apartment::where('user_id',$user->id)->get());
+    }
+
     public function create_apartment(CreateApartmentRequest $request)
     {
         $user = Auth::user();
