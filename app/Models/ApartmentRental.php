@@ -13,12 +13,23 @@ class ApartmentRental extends Model
         'user_id',
         'rental_start_date',
         'rental_end_date',
-        'is_canceled',
-        'is_landlord_approved',
+        'status',
         'total_rental_price',
         'card_number'
     ];
 
+    protected $attributes = [
+        'status' => 'pending',
+    ];
+    protected $casts = [
+        'status'=>'string',
+    ];
+
+    public function isPending()   { return $this->status === 'pending'; }
+    public function isApproved()  { return $this->status === 'approved'; }
+    public function isRejected()  { return $this->status === 'rejected'; }
+    public function isCanceled()  { return $this->status === 'canceled'; }
+    
     public function apartment()
     {
         return $this->belongsTo(Apartment::class, 'apartment_id');

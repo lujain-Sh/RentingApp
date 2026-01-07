@@ -23,8 +23,8 @@ class RentalService
     private function checkOverlap(int $apartmentId, DateTime $startDate, DateTime $endDate, ?int $excludeRentalId = null): bool
     {
         $query = ApartmentRental::where('apartment_id', $apartmentId)
-            ->where('is_canceled', false)
-            ->where('is_landlord_approved', true);
+            ->where('status', 'approved');
+            // ->where('is_landlord_approved', true);
         if ($excludeRentalId !== null) {
             $query->where('id', '!=', $excludeRentalId);
         }
@@ -35,6 +35,26 @@ class RentalService
         })->exists();
         
         return $overlapExists;
+    }
+
+    public function hasApprovedOverlap($apartmentId, $startDate, $endDate, $rentalId)
+    {
+        if( ApartmentRental::where('apartment_id', $apartmentId)
+            ->where('id', '!=', $rentalId)
+            ->where('status', 'approved')
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('rental_start_date', [$startDate, $endDate])
+                ->orWhereBetween('rental_end_date', [$startDate, $endDate])
+                ->orWhere(function ($q) use ($startDate, $endDate) {
+                    $q->where('rental_start_date', '<=', $startDate)
+                        ->where('rental_end_date', '>=', $endDate);
+                });
+            })
+            ->exists()
+        ) return true;
+            
+        return false;
+
     }
     
     public function areDatesSameAsCurrent(int $rentalId, DateTime $startDate, DateTime $endDate): bool

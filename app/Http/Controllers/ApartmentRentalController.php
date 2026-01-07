@@ -24,7 +24,7 @@ class ApartmentRentalController extends Controller
     
     public function createRental(CreateRentalRequest $request, $apartment_id)
     {
-        $user_id=Auth::user()->id;
+        $user_id = Auth::user()->id;
         $validatedData=$request->validated();
         $validatedData['user_id']=$user_id;
         $validatedData['apartment_id'] = $apartment_id;
@@ -41,116 +41,19 @@ class ApartmentRentalController extends Controller
         }
         $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($apartment_id, $numberOfDays);
         $rental=ApartmentRental::create($validatedData);
-        return response()->json(['message'=>'rental created successfully','rental_id'=>$rental->id],201);
-    }
 
-    public function cancelRental($rental_id)
-    {
-        $user_id=Auth::user()->id;
-        $rental= $this->getUserRental($rental_id,$user_id);
-        if(!$rental){
-            return response()->json(['message'=>'rental not found',],404);
-        }
-        if ($rental->is_canceled) {
-            return response()->json(['message'=>'rental is already canceled'],422);
-        }
-        if ($rental->pendingUpdateRequest) {
-            $rental->pendingUpdateRequest->update(['status' => 'rejected']);
-        }
-        $rental->is_canceled = true;
-        $rental->save();
-        return response()->json(['message'=>'rental cancelled successfully',],200);
-    }
-
-    public function updateRental(CreateRentalUpdateRequest $request, $rental_id)
-    {
-        $rental = $this->getUserRental($rental_id);
-
-        if (!$rental) {
-            return response()->json(['message' => 'Rental not found'], 404);
-        }
-
-        if ($rental->is_canceled) {
-            return response()->json(['message' => 'Cannot update a canceled rental'], 422);
-        }
-
-        $validatedData = $request->validated();
-        $startDate = new \DateTime($validatedData['rental_start_date']);
-        $endDate = new \DateTime($validatedData['rental_end_date']);
-        
-        if ($this->rentalService->areDatesSameAsCurrent($rental_id, $startDate, $endDate)) {
-            return response()->json(['message' => 'Rental dates are unchanged'], 200);
-        }
-
-        if ($this->rentalService->checkOverlapForUpdate($rental->apartment_id, $startDate, $endDate, $rental_id)) {
-            return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
-        }
-
-        $numberOfDays = $endDate->diff($startDate)->days + 1;
-        $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($rental->apartment_id, $numberOfDays);
-
-        if ($rental->is_landlord_approved) {
-            return $this->handleApprovedRentalUpdate($rental, $validatedData);
-        }
-
-        $rental->update($validatedData);
-        return response()->json(['message' => 'Rental updated successfully'], 200);
-    }
-
-    private function handleApprovedRentalUpdate(ApartmentRental $rental, array $data)
-    {
-        if ($this->rentalService->hasPendingUpdateRequest($rental->id)) {
-            return response()->json(['message' => 'A pending update request already exists'], 422);
-        }
-
-        $updateRequest = $this->rentalService->createUpdateRequest($rental, $data);
-
+        $rental->unsetRelation('apartment');
         return response()->json([
-            'message' => 'Your rental is already approved. An update request has been sent to the landlord.',
-            'update_request_id' => $updateRequest->id
-        ], 202); 
+            'message'=>'rental created successfully',
+            'rental_id'=>$rental->id,
+            // 'rental'=>$rental, 
+        ],201);
     }
-
-    public function approveRentalUpdate($update_request_id)
-    {
-        $updateRequest = RentalUpdateRequest::with('rental.apartment')->findOrFail($update_request_id);
     
-        if ($updateRequest->status !== 'pending') {
-            return response()->json(['message' => 'This request has already been processed'], 422);
-        }
-        
-        if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-        
-        if ($updateRequest->status !== 'pending') {
-            return response()->json(['message' => 'This request has already been processed'], 422);
-        }
-
-        $rental = $this->rentalService->applyUpdateRequest($updateRequest);
-
-        return response()->json([
-            'message' => 'Rental update approved and applied',
-            'rental' => $rental
-        ], 200);
-    }
-
-    public function rejectRentalUpdate(Request $request, $update_request_id)
+    public function getUserRentals()
     {
-        $updateRequest = RentalUpdateRequest::with('rental.apartment')->findOrFail($update_request_id);
-
-        if ($updateRequest->status !== 'pending') {
-            return response()->json(['message' => 'This request has already been processed'], 422);
-        }
-    
-        if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized. Only the landlord can reject updates.'], 403);
-        }
-        
-        $reason = $request->input('rejection_reason');
-        $this->rentalService->rejectUpdateRequest($updateRequest, $reason);
-
-        return response()->json(['message' => 'Rental update rejected'], 200);
+        $rentals = Auth::user()->rentals;
+        return response()->json($rentals, 200);
     }
 
     private function getUserRental($rental_id): ?ApartmentRental
@@ -159,42 +62,177 @@ class ApartmentRentalController extends Controller
         return ApartmentRental::where('id', $rental_id)
             ->where('user_id', $user_id)->first();
     }
-
-    public function getUserRentals()
+    
+    public function cancelRental($rental_id)
     {
-        $rentals = Auth::user()->rentals;
-        return response()->json($rentals, 200);
-    }
-
+        $rental= $this->getUserRental($rental_id);
+        if(!$rental){
+            return response()->json(['message'=>'rental not found',],404);
+        }
+        if ($rental->isCanceled()) {
+            return response()->json(['message'=>'rental is already canceled'],422);
+        }
+        if ($rental->isApproved()) {
+            return response()->json(['message'=>'rental is already approved !'],422);
+        }
+        if ($rental->isRejected()) {
+            return response()->json(['message'=>'rental is already reject !'],422);
+        }
+        if ($rental->pendingUpdateRequest) { //????
+            $rental->pendingUpdateRequest->update(['status' => 'rejected']);
+        }
+        $rental->update(['status' => 'canceled']);
+        return response()->json(['message'=>'rental cancelled successfully',],200);
+    }    
+    
     public function approveRental($rental_id)
     {
-        $rental=ApartmentRental::findOrFail($rental_id);
+        $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
+
+        if($rental->apartment->user_id !== Auth::id()){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
         }
-        if($rental->is_canceled){
+        if($rental->isCanceled()){
             return response()->json(['message'=>'cannot approve a canceled rental',],422);
         }
-        $rental->update(['is_landlord_approved' => true]);
+
+        if ($this->rentalService->hasApprovedOverlap(
+                    $rental->apartment_id , $rental->rental_start_date,
+                    $rental->rental_end_date , $rental->id)) 
+        {
+            $rental->update(['status' => 'rejected']);
+            $rental->unsetRelation('apartment');
+            return response()->json([
+                'message' => 'Rental auto-rejected due to date conflict', // think later how to fix conf better
+                'rental' => $rental
+            ], 409);
+        }
+
+        $rental->update(['status' => 'approved']);
+        $rental->unsetRelation('apartment');
         return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
     }
-
+    
     public function rejectRental($rental_id)
     {
-        $rental=ApartmentRental::findOrFail($rental_id);
+        $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
 
+        if($rental->apartment->user_id !== Auth::id()){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+    
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
         }
-        if($rental->is_canceled){
+        if($rental->isCanceled()){
             return response()->json(['message'=>'cannot reject a canceled rental',],422);
         }
-        if($rental->is_landlord_approved){
+        if($rental->isApproved()){
             return response()->json(['message'=>'cannot reject an approved rental',],422);
         }
-        $rental->update(['is_landlord_approved' => false]);
+        $rental->update(['status' => 'rejected']);
+        $rental->unsetRelation('apartment');
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
     }
+
+
+
+
+    // checked till here     
+    public function updateRental(CreateRentalUpdateRequest $request, $rental_id)
+    {
+        $rental = $this->getUserRental($rental_id);
+
+        if (!$rental) {
+            return response()->json(['message' => 'Rental not found'], 404);
+        }    
+
+        if ($rental->isCanceled()) {
+            return response()->json(['message' => 'Cannot update a canceled rental'], 422);
+        }    
+
+        $validatedData = $request->validated();
+        $startDate = new \DateTime($validatedData['rental_start_date']);
+        $endDate = new \DateTime($validatedData['rental_end_date']);
+        
+        if ($this->rentalService->areDatesSameAsCurrent($rental_id, $startDate, $endDate)) {
+            return response()->json(['message' => 'Rental dates are unchanged'], 200);
+        }    
+
+        if ($this->rentalService->checkOverlapForUpdate($rental->apartment_id, $startDate, $endDate, $rental_id)) {
+            return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
+        }    
+
+        $numberOfDays = $endDate->diff($startDate)->days + 1;
+        $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($rental->apartment_id, $numberOfDays);
+
+        if ($rental->is_landlord_approved) {
+            return $this->handleApprovedRentalUpdate($rental, $validatedData);
+        }    
+
+        $rental->update($validatedData);
+        return response()->json(['message' => 'Rental updated successfully'], 200);
+    }    
+
+    private function handleApprovedRentalUpdate(ApartmentRental $rental, array $data)
+    {
+        if ($this->rentalService->hasPendingUpdateRequest($rental->id)) {
+            return response()->json(['message' => 'A pending update request already exists'], 422);
+        }    
+
+        $updateRequest = $this->rentalService->createUpdateRequest($rental, $data);
+
+        return response()->json([
+            'message' => 'Your rental is already approved. An update request has been sent to the landlord.',
+            'update_request_id' => $updateRequest->id
+        ], 202);     
+    }    
+
+    public function approveRentalUpdate($update_request_id)
+    {
+        $updateRequest = RentalUpdateRequest::with('rental.apartment')->findOrFail($update_request_id);
+    
+        if ($updateRequest->status !== 'pending') {
+            return response()->json(['message' => 'This request has already been processed'], 422);
+        }    
+        
+        if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }    
+        
+        if ($updateRequest->status !== 'pending') {
+            return response()->json(['message' => 'This request has already been processed'], 422);
+        }    
+
+        $rental = $this->rentalService->applyUpdateRequest($updateRequest);
+
+        return response()->json([
+            'message' => 'Rental update approved and applied',
+            'rental' => $rental
+        ], 200);    
+    }    
+
+    public function rejectRentalUpdate(Request $request, $update_request_id)
+    {
+        $updateRequest = RentalUpdateRequest::with('rental.apartment')->findOrFail($update_request_id);
+
+        if ($updateRequest->status !== 'pending') {
+            return response()->json(['message' => 'This request has already been processed'], 422);
+        }    
+    
+        if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized. Only the landlord can reject updates.'], 403);
+        }    
+        
+        $reason = $request->input('rejection_reason');
+        $this->rentalService->rejectUpdateRequest($updateRequest, $reason);
+
+        return response()->json(['message' => 'Rental update rejected'], 200);
+    }    
 
 
 }
