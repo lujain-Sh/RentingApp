@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('requested_start_date');
             $table->date('requested_end_date');
             $table->decimal('requested_total_price', 10, 2);
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected','canceled'])->default('pending');
             // $table->text('rejection_reason')->nullable();
             $table->date('current_start_date');
             $table->date('current_end_date');

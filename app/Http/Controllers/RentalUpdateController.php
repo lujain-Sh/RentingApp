@@ -35,10 +35,7 @@ class RentalUpdateController extends Controller
         if ($rental->isRejected()) {
             return response()->json(['message' => 'Cannot update a rejected rental'], 422);
         }    
-        if ($rental->isApproved()) {
-            return response()->json(['message' => 'Cannot update an approved rental'], 422);
-        } 
-        
+
         $validatedData = $request->validated();
         $startDate = new \DateTime($validatedData['rental_start_date']);
         $endDate = new \DateTime($validatedData['rental_end_date']);
@@ -54,7 +51,7 @@ class RentalUpdateController extends Controller
         $numberOfDays = $endDate->diff($startDate)->days + 1;
         $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($rental->apartment_id, $numberOfDays);
 
-        if ($rental->is_landlord_approved) {
+        if ($rental->isApproved()) {
             return $this->handleApprovedRentalUpdate($rental, $validatedData);
         }    
 
@@ -87,10 +84,13 @@ class RentalUpdateController extends Controller
         if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }    
-        
-        if ($updateRequest->status !== 'pending') {
-            return response()->json(['message' => 'This request has already been processed'], 422);
-        }    
+
+        $startDate = new \DateTime($updateRequest->requested_start_date);
+        $endDate = new \DateTime($updateRequest->requested_end_date);
+        if ($this->rentalService->checkOverlapForUpdate($updateRequest->rental->apartment_id, $startDate, $endDate, $updateRequest->rental->id)) {
+            $updateRequest->update(['status' => 'rejected']);
+            return response()->json(['message' => 'Apartment is already rented for the requested dates'], 422);
+        }
 
         $rental = $this->rentalService->applyUpdateRequest($updateRequest);
 
@@ -102,7 +102,11 @@ class RentalUpdateController extends Controller
 
     public function rejectRentalUpdate(Request $request, $update_request_id)
     {
-        $updateRequest = RentalUpdateRequest::with('rental.apartment')->findOrFail($update_request_id);
+        $updateRequest = RentalUpdateRequest::with('rental.apartment')->find($update_request_id);
+
+        if(!$updateRequest){
+            return response()->json(['message'=>'request not found !'],404);
+        }
 
         if ($updateRequest->status !== 'pending') {
             return response()->json(['message' => 'This request has already been processed'], 422);
@@ -117,5 +121,56 @@ class RentalUpdateController extends Controller
 
         return response()->json(['message' => 'Rental update rejected'], 200);
     }    
+
+    public function cancelRentalUpdate($update_request_id)
+    {
+        $user_id = Auth::user()->id;
+
+        $updateRequest = RentalUpdateRequest::where('id', $update_request_id)
+            ->whereHas('rental', function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })->first();
+
+        if (!$updateRequest) {
+            return response()->json(['message' => 'Update request not found'], 404);
+        }    
+
+        if ($updateRequest->status !== 'pending') {
+            return response()->json(['message' => 'Only pending requests can be canceled'], 422);
+        }    
+
+        $updateRequest->update(['status' => 'canceled']);
+
+        return response()->json(['message' => 'Rental update request canceled successfully'], 200);
+    }
+
+    public function getUserRentalUpdateRequests()
+    {
+        $user_id = Auth::user()->id;
+
+        $updateRequests = RentalUpdateRequest::whereHas('rental', function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })->get();
+
+        return response()->json($updateRequests, 200);
+    }
+
+    // get updating requests for the apt of the owner using owner id
+    public function getOwnerRentalUpdateRequests()
+    {
+        $owner_id = Auth::user()->id;
+
+        // get only the pending requests
+        $updateRequests = RentalUpdateRequest::whereHas('rental.apartment', function ($query) use ($owner_id) {
+                $query->where('user_id', $owner_id);
+            })->where('status','pending')
+            ->get();
+
+        return response()->json($updateRequests, 200);
+    }
+        
+        
+
+
 
 }
