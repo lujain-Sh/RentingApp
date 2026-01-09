@@ -156,7 +156,7 @@ class RentalUpdateController extends Controller
     }
 
     // get updating requests for the apt of the owner using owner id
-    public function getOwnerRentalUpdateRequests()
+    public function incomingRentalUpdateRequests()
     {
         $owner_id = Auth::user()->id;
 
