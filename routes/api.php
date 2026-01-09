@@ -21,24 +21,32 @@ Route::prefix('/user')->group(function()
     Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental'])->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
+
     Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
+    Route::get('/my_past_rentals',[ApartmentRentalController::class,'getUserPastRentals'])->middleware('auth:sanctum');
+    Route::get('/my_ongoing_rentals',[ApartmentRentalController::class,'getUserOngoingRentals'])->middleware('auth:sanctum');
+
     Route::post('/register',[UserController::class,'register']);
     Route::post('/login',[UserController::class,'login']);
     Route::post('/logout',[UserController::class,'logout'])->middleware('auth:sanctum');
-    Route::get('/check-approve',[UserController::class,'checkApprove']);  
+    // Route::get('/check-approve',[UserController::class,'checkApprove']);  
 });
 
 
 Route::prefix('/apartments')->group(function()
 {
 
+    Route::get('/{id}', [ApartmentController::class, 'show']);
     Route::get('/', [ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
-    Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
+
     Route::post('/create',[ApartmentController::class,'create_apartment'])->middleware('auth:sanctum');
     Route::get('/filter', [ApartmentController::class, 'filterApartment']);
-    Route::get('/{id}', [ApartmentController::class, 'show']);
+
+    Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
+
     Route::get('/{id}/ratings', [ApartmentRatingController::class, 'listByApartment']);
     Route::post('/rentals/{rental_id}/ratings', [ApartmentRatingController::class, 'createRating'])->middleware('auth:sanctum');
+
     Route::post('/{update_request_id}/rentals/approve',[ApartmentRentalController::class,'approveRentalUpdate'])->middleware('auth:sanctum');
     Route::post('/{update_request_id}/rentals/reject',[ApartmentRentalController::class,'rejectRentalUpdate'])->middleware('auth:sanctum');
 });
