@@ -14,7 +14,22 @@ class Apartment extends Model
     ];
     protected $with = ['address', 'details', 'assets', 'ratings'];
 
-    protected $hidden = ['user_id', 'address_id', 'updated_at', 'created_at'/*,'id'*/];
+    protected $hidden = ['user', 'address_id', 'updated_at', 'created_at'/*,'id'*/];
+
+    protected $appends = [
+        'owner_name',
+        'owner_photo_url',
+    ];
+
+    public function getOwnerNameAttribute()
+    {
+        return $this->user?->first_name . ' ' . $this->user?->last_name;
+    }
+
+    public function getOwnerPhotoUrlAttribute()
+    {
+        return $this->user?->legal_photo_url;
+    }
 
     public function details()
     {

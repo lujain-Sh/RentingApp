@@ -96,15 +96,14 @@ class ApartmentRatingController extends Controller
     // 
     public function listByApartment(int $apartment_id)
     {
-        $apartment = Apartment::findOrFail($apartment_id);
+        $apartment = Apartment::find($apartment_id);
 
-        $ratings = $apartment->ratings()
-            ->with('user:id,first_name,last_name')
+        if(!$apartment) return response()->json(['message'=>'Apartment not found'],404);
+
+        $ratings = ApartmentRating::with('user:id,first_name,last_name,legal_photo_url')
+            ->where('apartment_id', $apartment_id)
             ->latest()
             ->get();
-            $ratings->each(function ($rating) {
-            $rating->user->makeHidden(['phone', 'full_phone_str']);
-        });
 
         return response()->json([
             'average_rating' => round($apartment->ratings()->avg('rating'), 2),

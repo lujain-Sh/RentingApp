@@ -102,6 +102,10 @@ class ApartmentController extends Controller
             ->select(/* 'id', */ 'apartment_id', 'rental_start_date', 'rental_end_date');
         }])->find($id);
 
+        if(!$apartment) {
+            return response()->json(['message'=>'Apartment not found'],404);
+        }
+
         return response()->json([
             'apartment'=>$apartment,
             'rate'=>round($apartment->ratings()->avg('rating'),2)
