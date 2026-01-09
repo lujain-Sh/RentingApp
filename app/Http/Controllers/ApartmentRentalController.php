@@ -40,6 +40,21 @@ class ApartmentRentalController extends Controller
             return response()->json(['message' => 'Apartment is already rented for the selected dates'], 422);
         }
         $validatedData['total_rental_price'] = $this->rentalService->calculateTotalPrice($apartment_id, $numberOfDays);
+
+        $exists = ApartmentRental::query()
+            ->where('user_id', $user_id)
+            ->where('apartment_id', $apartment_id)
+            ->whereDate('rental_start_date', $startDate)
+            ->whereDate('rental_end_date', $endDate)
+            ->whereIn('status', ['pending','approved'])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'You already have an active rental request for these dates.'
+            ], 409);
+        }
+        
         $rental=ApartmentRental::create($validatedData);
 
         $rental->unsetRelation('apartment');

@@ -27,7 +27,7 @@ class ApartmentController extends Controller
         
         $cityId = City::getOrCreate(
             $data['city'],
-            Governorate::from($data['governorate'])
+            Governorate::from((int) $data['governorate'])
         );
 
         $address = Address::where('governorate', $data['governorate'])
@@ -67,6 +67,7 @@ class ApartmentController extends Controller
                 'has_balcony' => $data['has_balcony'],
             ]);
 
+        if (!empty($data['assets']) && is_array($data['assets'])) {
             foreach ($data['assets'] as $asset) {
                 try {
                     $path = $asset->store('apartment_assets', 'public');
@@ -78,7 +79,7 @@ class ApartmentController extends Controller
                     $failedAssets[] = $asset->getClientOriginalName();
                 }
             }
-            
+        }
             return response()->json([
                 'message' => 'Apartment listed successfully',
                 // 'apartment_id' => $apartment->id,
@@ -96,10 +97,11 @@ class ApartmentController extends Controller
 
     public function show($id)
     {
-        $apartment=Apartment::find($id);
-        if(!$apartment || !$apartment->is_active){
-            return response()->json(['message'=>'Apartment not found'],404);
-        }
+        $apartment = Apartment::with(['rentals' => function ($q) {
+            $q->where('status', 'approved')
+            ->select(/* 'id', */ 'apartment_id', 'rental_start_date', 'rental_end_date');
+        }])->find($id);
+
         return response()->json([
             'apartment'=>$apartment,
             'rate'=>round($apartment->ratings()->avg('rating'),2)
