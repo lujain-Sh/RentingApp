@@ -39,15 +39,20 @@ class ApartmentRatingController extends Controller
             ], 403);
         }
 
-        if($rental->is_canceled == true) {
+        if($rental->isCanceled()) {
             return response()->json([
                 'message' => 'You cannot rate a canceled rental',
             ], 403);
         }
 
-        if($rental->is_landlord_approved == false) {
+        if($rental->isApproved()) {
             return response()->json([
                 'message' => 'You cannot rate a rental that was not approved by the landlord',
+            ], 403);
+        }
+        if($rental->isRejected()) {
+            return response()->json([
+                'message' => 'You cannot rate a rental that was rejected by the landlord',
             ], 403);
         }
 
