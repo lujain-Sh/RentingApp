@@ -33,6 +33,8 @@ class FilterApartmentRequest extends FormRequest
             'min_area' => 'nullable|numeric|min:50',
             'max_area' => 'nullable|numeric|min:50',
             'has_balcony' => 'nullable|boolean',
+            'min_rating' => 'nullable|numeric|min:1|max:5',
+            'max_rating' => 'nullable|numeric|min:1|max:5',
         ];
     }
 }

@@ -167,12 +167,37 @@ class ApartmentController extends Controller
             $q->whereHas('details', fn ($d) => $d->where('has_balcony', $v))
         );
 
+        if (isset($data['min_rating']) || isset($data['max_rating'])) {
+        $min = $data['min_rating'] ?? 0;
+        $max = $data['max_rating'] ?? 5;
+
+        $ratingSub = DB::table('apartment_ratings')
+            ->select('apartment_id', DB::raw('AVG(rating) as avg_rating'))
+            ->groupBy('apartment_id');
+
+        // leftJoinSub so unrated apartments get NULL avg_rating (use COALESCE if you want treat null as 0)
+        $query->leftJoinSub($ratingSub, 'rating_avg', function ($join) {
+            $join->on('apartments.id', '=', 'rating_avg.apartment_id');
+        });
+
+        // ensure we still select apartment columns (avoid ambiguous columns)
+        $query->select('apartments.*');
+
+        // filter using COALESCE so null -> 0 (change if you prefer to exclude unrated)
+        $query->whereBetween(DB::raw('COALESCE(rating_avg.avg_rating, 0)'), [$min, $max]);
+    }
+
+    // eager load avg rating to avoid N+1 when mapping results
+    $query->withAvg('ratings', 'rating')->with(['address', 'details', 'assets']);
+
+    $apartments = $query->get();
+
         return response()->json(
-            $query->get()->map(fn ($apartment) => [
+            $apartments->map(fn ($apartment) => [
                 'apartment_id' => $apartment->id,
                 'address' => $apartment->address,
                 'price_per_night' => $apartment->details->rent_price_per_night,
-                'rate' => round($apartment->ratings()->avg('rating'),2),
+                'rate' => $apartment->ratings_avg_rating ? round($apartment->ratings_avg_rating, 2) : null,
                 'assets' => $apartment->assets->pluck('asset_url')->first(),
             ])
         , 200);
