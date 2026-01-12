@@ -67,4 +67,20 @@ class Apartment extends Model
                     ->withTimestamps();
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($apartment) {
+
+            // delete related address
+            if ($apartment->address) {
+                $apartment->address->delete();
+            }
+
+            // OPTIONAL: if you want to clean other relations manually
+            $apartment->assets()->delete();
+            $apartment->details()->delete();
+            $apartment->ratings()->delete();
+        });
+    }
+
 }
