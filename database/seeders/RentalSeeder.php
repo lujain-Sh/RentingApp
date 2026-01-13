@@ -18,7 +18,7 @@ class RentalSeeder extends Seeder
         foreach ($users as $user) {
             $apartment = $apartments->random();
             $start_date = now()->addDays(rand(1, 10));
-            $end_date = now()->addDays(rand(15, 30));
+            $end_date = (clone $start_date)->addDays(rand(15, 30));
 
             ApartmentRental::create([
                 'user_id' => $user->id,
