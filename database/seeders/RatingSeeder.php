@@ -15,15 +15,15 @@ class RatingSeeder extends Seeder
      */
     public function run(): void
     {
-        // Only rentals that are finished
-        // $rentals = Rental::where('end_date', '<', now())
+        $rentals = ApartmentRental::all();
+        // Only finished rentals 
+        // where('rental_end_date', '<', now())
         //     ->whereNotNull('user_id')
         //     ->get();
-        $rentals = ApartmentRental::all();
 
         foreach ($rentals as $rental) {
 
-            // Prevent duplicate rating
+            // User already rated this apartment → skip
             $alreadyRated = ApartmentRating::where('user_id', $rental->user_id)
                 ->where('apartment_id', $rental->apartment_id)
                 ->exists();
@@ -35,8 +35,7 @@ class RatingSeeder extends Seeder
             ApartmentRating::create([
                 'user_id' => $rental->user_id,
                 'apartment_id' => $rental->apartment_id,
-                'apartment_rental_id' => $rental->id,
-                'rating' => rand(3, 5), // realistic ratings
+                'rating' => rand(3, 5),
                 'comment' => fake()->optional()->sentence(10),
             ]);
         }
