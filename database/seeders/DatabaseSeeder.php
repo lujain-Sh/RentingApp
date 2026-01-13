@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
                 ApartmentAssetSeeder::class,
                 RentalSeeder::class,
                 FavoriteSeeder::class,
-                RatingSeeder::class,
+                // RatingSeeder::class, /// needs to be fixed
                 // TestDataSeeder::class,
             ]);
 

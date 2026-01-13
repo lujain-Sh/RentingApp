@@ -88,15 +88,15 @@ class UserController extends Controller
             return response()->json(['message' => 'Invalid password'], 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+        
         if(!$user->is_admin_validated){
             return response()->json([
                 'message' => 'Admin has not approved your account yet',
-                'token'   => $token
-            ], 403);
+                // 'token'   => $token
+                ], 403);
         }
-
+        $token = $user->createToken('auth_token')->plainTextToken;
+                
         return response()->json([
             'message' => 'Logged in successfully',
             'user'    => $user,

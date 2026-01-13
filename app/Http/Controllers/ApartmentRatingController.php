@@ -6,87 +6,81 @@ use App\Http\Requests\CreateApartmentRatingRequest;
 use App\Models\Apartment;
 use App\Models\ApartmentRating;
 use App\Models\ApartmentRental;
+use App\Services\ApartmentRatingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-// use Ramsey\Uuid\Type\Integer;
 
 class ApartmentRatingController extends Controller
 {
-    public function createRating(CreateApartmentRatingRequest $request, int $rental_id)
+
+    protected $ratingService;
+
+    public function __construct(ApartmentRatingService $ratingService)
     {
+        $this->ratingService = $ratingService;
+    }
+
+
+    //user can rate only if:
+    //- they have rented the apartment
+    //- the rental period has ended , and it's not canceled ,pending or rejected
+    //- they have not already rated this rental
+
+    public function canRate(int $apartment_id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // 1. Already rated?
+        $alreadyRated = $this->ratingService->hasUserAlreadyRatedApartment($user,$apartment_id);
+
+        if ($alreadyRated) {
+            return response()->json([
+                'can_rate' => false,
+                'message' => 'You have already rated this apartment',
+            ]);
+        }
+
+        // 2. Has a finished approved rental?
+        $hasValidRental = $this->ratingService->hasUserValidRentalForApartment($user, $apartment_id);
+
+        if (!$hasValidRental) {
+            return response()->json([
+                'can_rate' => false,
+                'message' => 'You can rate only after completing an approved rental',
+            ]);
+        }
+
+        return response()->json([
+            'can_rate' => true,
+            'message' => 'You can rate this apartment',
+        ]);
+    }
+
+
+    public function createRating(CreateApartmentRatingRequest $request, int $apartment_id)
+    {
+        // recheck again 
         $user = Auth::user();
         if (!$user) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 401);
         }
+        if (!$this->ratingService->canUserRateApartment($user, $apartment_id)) {
+            return response()->json([
+                'can_rate' => false,
+                'message' => 'You cannot rate this apartment',
+            ]);
+        }
         $user_id = $user->id;
         $data = $request->validated();
 
-        $rental = ApartmentRental::find($rental_id);
-
-        if (!$rental) {
-            return response()->json([
-                'message' => 'Rental not found'
-            ], 404);
-        }
-
-        $rental_user_id = $rental->user_id;
-
-        if ($rental_user_id != $user_id ) {
-            return response()->json([
-                'message' => 'You can only rate apartments you have rented',
-            ], 403);
-        }
-
-        if($rental->isCanceled()) {
-            return response()->json([
-                'message' => 'You cannot rate a canceled rental',
-            ], 403);
-        }
-
-        if($rental->isApproved()) {
-            return response()->json([
-                'message' => 'You cannot rate a rental that was not approved by the landlord',
-            ], 403);
-        }
-        if($rental->isRejected()) {
-            return response()->json([
-                'message' => 'You cannot rate a rental that was rejected by the landlord',
-            ], 403);
-        }
-
-        if(ApartmentRating::where('apartment_rental_id', $rental->id)->exists()) {
-            return response()->json([
-                'message' => 'You have already rated this rental',
-            ], 409);
-        }
-        
-        // It's me Dana check if this is the way you are using DateTime :)
-        if(new \DateTime() < new \DateTime($rental->rental_end_date)) {
-            return response()->json([
-                'message' => 'You can only rate after the rental period has ended',
-            ], 403);
-        }
-
-        // chatGPT says to do it this way :)
-        // use Carbon\Carbon;
-
-        // if (Carbon::today()->lte(Carbon::parse($rental->rental_end_date))) {
-        //     return response()->json([
-        //         'message' => 'You can only rate after the rental period has ended',
-        //     ], 403);
-        // }
-
-
-        $data['user_id'] = $user_id;
-        $data['apartment_id'] = $rental->apartment_id;
-        $data['apartment_rental_id'] = $rental->id;
-
         $rating = ApartmentRating::create([
-            'user_id' => $data['user_id'],
-            'apartment_id' => $data['apartment_id'],
-            'apartment_rental_id' => $data['apartment_rental_id'],
+            'user_id' => $user_id,
+            'apartment_id' => $apartment_id,
             'rating' => $data['rating'],
             'comment' => $data['comment'] ?? null,
         ]);

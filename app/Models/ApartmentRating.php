@@ -14,7 +14,6 @@ class ApartmentRating extends Model
     protected $fillable = [
         'apartment_id',
         'user_id',
-        'apartment_rental_id',
         'rating',
         'comment',
     ];
