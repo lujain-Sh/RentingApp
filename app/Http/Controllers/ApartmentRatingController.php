@@ -37,9 +37,13 @@ class ApartmentRatingController extends Controller
         $alreadyRated = $this->ratingService->hasUserAlreadyRatedApartment($user,$apartment_id);
 
         if ($alreadyRated) {
+            $rating = ApartmentRating::where('user_id', $user->id)
+                ->where('apartment_id', $apartment_id)
+                ->first();
             return response()->json([
                 'can_rate' => false,
                 'message' => 'You have already rated this apartment',
+                'rating' => $rating,
             ]);
         }
 
@@ -91,6 +95,30 @@ class ApartmentRatingController extends Controller
         ], 201);
 
     }
+
+    public function editRating(CreateApartmentRatingRequest $request, int $rating_id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $rating = ApartmentRating::find($rating_id);
+        if (!$rating || $rating->user_id !== $user->id) {
+            return response()->json(['message' => 'Rating not found or access denied'], 404);
+        }
+
+        $data = $request->validated();
+        $rating->rating = $data['rating'];
+        $rating->comment = $data['comment'] ?? $rating->comment;
+        $rating->save();
+
+        return response()->json([
+            'message' => 'Rating updated successfully',
+            'rating' => $rating,
+        ]);
+    }
+    // 
 
     // 
     public function listByApartment(int $apartment_id)

@@ -43,9 +43,10 @@ Route::prefix('/apartments')->group(function()
 
     Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
 
-    Route::get('/{id}/ratings', [ApartmentRatingController::class, 'listByApartment']);
-    Route::post('/{apartment_id}/rate', [ApartmentRatingController::class, 'createRating'])->middleware('auth:sanctum');
     Route::get('/{apartment_id}/can-rate', [ApartmentRatingController::class, 'canRate'])->middleware('auth:sanctum');
+    Route::post('/{apartment_id}/rate', [ApartmentRatingController::class, 'createRating'])->middleware('auth:sanctum');
+    Route::put('/{rate_id}/rate/update',[ApartmentRatingController::class,'editRating'])->middleware('auth:sanctum');
+    Route::get('/{id}/ratings', [ApartmentRatingController::class, 'listByApartment']);
 });
 
 
