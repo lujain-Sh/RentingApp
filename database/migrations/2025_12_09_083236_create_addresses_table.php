@@ -1,6 +1,6 @@
 <?php
 
-use App\Governorate;
+use App\Enums\Governorate;
 use App\Models\City;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

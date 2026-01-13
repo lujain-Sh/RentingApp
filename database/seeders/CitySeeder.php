@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Governorate;
+use App\Enums\Governorate;
 use App\Models\City;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

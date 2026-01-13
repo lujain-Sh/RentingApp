@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Governorate;
+use App\Enums\Governorate;
 use Illuminate\Database\Eloquent\Model;
 
 class City extends Model

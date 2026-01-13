@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Governorate;
+use App\Enums\Governorate;
 use App\Http\Requests\CreateApartmentRequest;
 use App\Http\Requests\FilterApartmentRequest;
 use App\Models\Address;

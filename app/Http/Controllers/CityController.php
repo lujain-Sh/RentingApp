@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Governorate;
+use App\Enums\Governorate;
 use App\Models\City;
 use Illuminate\Http\Request;
 
