@@ -6,6 +6,7 @@ use App\Http\Controllers\ApartmentRatingController;
 use App\Http\Controllers\ApartmentRentalController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RentalUpdateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -35,11 +36,12 @@ Route::prefix('/user')->group(function()
 
 Route::prefix('/apartments')->group(function()
 {
+    Route::get('/filter', [ApartmentController::class, 'filterApartment']);
+    
     Route::get('/{id}', [ApartmentController::class, 'show']);
     Route::get('/', [ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
 
     Route::post('/create',[ApartmentController::class,'create_apartment'])->middleware('auth:sanctum');
-    Route::get('/filter', [ApartmentController::class, 'filterApartment']);
 
     Route::post('/{apartment_id}/rentals',[ApartmentRentalController::class,'createRental'])->middleware('auth:sanctum');
 
@@ -50,20 +52,25 @@ Route::prefix('/apartments')->group(function()
 });
 
 
-Route::middleware('auth:sanctum')->group(function () 
+// Route::middleware('auth:sanctum')->group(function () 
+// {
+Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(function () 
 {
-    Route::prefix('rental-update-requests')->group(function () 
-    {
-        Route::put('/{rental_id}/update',[RentalUpdateController::class,'updateRental'])->middleware('auth:sanctum');
-        // lists
-        Route::get('/mine', [RentalUpdateController::class, 'getUserRentalUpdateRequests']);
-        Route::get('/incoming', [RentalUpdateController::class, 'incomingRentalUpdateRequests']);
-        // actions on a request
-        Route::put('/{request}/approve', [RentalUpdateController::class, 'approveRentalUpdate']);
-        Route::put('/{request}/reject', [RentalUpdateController::class, 'rejectRentalUpdate']);
-        Route::put('/{request}/cancel', [RentalUpdateController::class, 'cancelRentalUpdate']);
-    });
+    Route::put('/{rental_id}/update',[RentalUpdateController::class,'updateRental'])->middleware('auth:sanctum');
+    // lists
+    Route::get('/mine', [RentalUpdateController::class, 'getUserRentalUpdateRequests']);
+    Route::get('/incoming', [RentalUpdateController::class, 'incomingRentalUpdateRequests']);
+    // actions on a request
+    Route::put('/{request}/approve', [RentalUpdateController::class, 'approveRentalUpdate']);
+    Route::put('/{request}/reject', [RentalUpdateController::class, 'rejectRentalUpdate']);
+    Route::put('/{request}/cancel', [RentalUpdateController::class, 'cancelRentalUpdate']);
+});
+// });
 
+Route::prefix('notifications')->middleware('auth:sanctum')->group(function () 
+{
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::put('/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
 });
 
 

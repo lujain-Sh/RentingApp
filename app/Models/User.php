@@ -30,6 +30,8 @@ class User extends Authenticatable
         'is_phone_number_validated',
         'is_active',
         'is_admin_validated',
+
+        'fcm_token',
     ];
 
 
@@ -96,6 +98,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Apartment::class, 'favorites')
                     ->withTimestamps();
+    }
+    
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
     }
 
 }

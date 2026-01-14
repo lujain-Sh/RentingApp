@@ -96,6 +96,8 @@ class UserController extends Controller
                 ], 403);
         }
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
                 
         return response()->json([
             'message' => 'Logged in successfully',

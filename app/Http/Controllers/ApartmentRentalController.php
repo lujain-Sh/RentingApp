@@ -7,6 +7,7 @@ use App\Http\Requests\CreateRentalUpdateRequest;
 use App\Models\Apartment;
 use App\Models\ApartmentRental;
 use App\Models\RentalUpdateRequest;
+use App\Services\NotificationService;
 use App\Services\RentalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +16,12 @@ class ApartmentRentalController extends Controller
 {
     //edit update migrate
     //get landloard rentals
-    protected $rentalService;
+    protected $rentalService, $notificationService;
     
-    public function __construct(RentalService $rentalService)
+    public function __construct(RentalService $rentalService, NotificationService $notificationService)
     {
         $this->rentalService = $rentalService;
+        $this->notificationService = $notificationService;
     }
     
     public function createRental(CreateRentalRequest $request, $apartment_id)
@@ -129,6 +131,15 @@ class ApartmentRentalController extends Controller
 
         $rental->update(['status' => 'approved']);
         $rental->unsetRelation('apartment');
+
+
+        $this->notificationService->sendToUser(
+            $rental->user,
+            'Rental Approved🎉',
+            'Your rental request for apartment ID '.$rental->apartment_id.' has been approved.',
+            ['rental_id' => $rental->id]
+        );
+
         return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
     }
     
@@ -151,6 +162,14 @@ class ApartmentRentalController extends Controller
         }
         $rental->update(['status' => 'rejected']);
         $rental->unsetRelation('apartment');
+
+        $this->notificationService->sendToUser(
+            $rental->user,
+            'Rental Rejected❌',
+            'Your rental request for apartment ID '.$rental->apartment_id.' has been rejected.',
+            ['rental_id' => $rental->id]
+        );
+        
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
     }
 

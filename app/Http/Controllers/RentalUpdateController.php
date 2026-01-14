@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateRentalUpdateRequest;
 use App\Models\ApartmentRental;
 use App\Models\RentalUpdateRequest;
+use App\Services\NotificationService;
 use App\Services\RentalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RentalUpdateController extends Controller
 {
-    protected $rentalService;
+    protected $rentalService,$notificationService;
     
-    public function __construct(RentalService $rentalService)
+    public function __construct(RentalService $rentalService , NotificationService $notificationService)
     {
         $this->rentalService = $rentalService;
+        $this->notificationService = $notificationService;
     }
 
     public function updateRental(CreateRentalUpdateRequest $request, $rental_id)
@@ -94,6 +96,13 @@ class RentalUpdateController extends Controller
 
         $rental = $this->rentalService->applyUpdateRequest($updateRequest);
 
+        $this->notificationService->sendToUser(
+            $rental->user,
+            'Rental Update Request Approved ✅',
+            'Your rental update request has been approved by the landlord.',
+            ['rental_id' => $rental->id]
+        );
+
         return response()->json([
             'message' => 'Rental update approved and applied',
             'rental' => $rental
@@ -117,7 +126,14 @@ class RentalUpdateController extends Controller
         }    
         
         $reason = $request->input('rejection_reason');
+
         $this->rentalService->rejectUpdateRequest($updateRequest, $reason);
+        $this->notificationService->sendToUser(
+            $updateRequest->rental->user,
+            'Rental Update Request Rejected ❌',
+            'Your rental update request has been rejected by the landlord.',
+            ['rental_id' => $updateRequest->rental->id ]// 'reason' => $reason]
+        );
 
         return response()->json(['message' => 'Rental update rejected'], 200);
     }    
