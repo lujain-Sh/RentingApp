@@ -12,6 +12,22 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+
+Route::post('/fcm-test', function (Request $request) {
+    $request->validate(['token' => 'required|string']);
+
+    $messaging = app('firebase.messaging');
+
+    $message = CloudMessage::withTarget('token', $request->token)
+        ->withNotification(Notification::create('Laravel ✅', 'Connected to Firebase FCM lets goooooooooooo!'));
+
+    $messaging->send($message);
+
+    return response()->json(['ok' => true]);
+});
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -30,14 +46,15 @@ Route::prefix('/user')->group(function()
     Route::post('/register',[UserController::class,'register']);
     Route::post('/login',[UserController::class,'login']);
     Route::post('/logout',[UserController::class,'logout'])->middleware('auth:sanctum');
-    // Route::get('/check-approve',[UserController::class,'checkApprove']);  
+    Route::get('/check-approve',[UserController::class,'checkApprove']);
+    Route::post('/fcm-token', [UserController::class, 'storeFcmToken'])->middleware('auth:sanctum');
 });
 
 
 Route::prefix('/apartments')->group(function()
 {
     Route::get('/filter', [ApartmentController::class, 'filterApartment']);
-    
+
     Route::get('/{id}', [ApartmentController::class, 'show']);
     Route::get('/', [ApartmentController::class, 'myApartments'])->middleware('auth:sanctum');
 
@@ -52,9 +69,9 @@ Route::prefix('/apartments')->group(function()
 });
 
 
-// Route::middleware('auth:sanctum')->group(function () 
+// Route::middleware('auth:sanctum')->group(function ()
 // {
-Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(function () 
+Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(function ()
 {
     Route::put('/{rental_id}/update',[RentalUpdateController::class,'updateRental'])->middleware('auth:sanctum');
     // lists
@@ -67,7 +84,7 @@ Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(funct
 });
 // });
 
-Route::prefix('notifications')->middleware('auth:sanctum')->group(function () 
+Route::prefix('notifications')->middleware('auth:sanctum')->group(function ()
 {
     Route::get('/', [NotificationController::class, 'index']);
     Route::put('/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);

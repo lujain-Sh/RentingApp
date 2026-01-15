@@ -30,12 +30,12 @@ class UserController extends Controller
             }
         }
         $phone_id  = PhoneSensitive::getOrCreate($data['country_code'],$data['phone_number']);
-        
+
         $request->validate([
             'legal_doc'   =>'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'legal_photo' =>'required|file|mimes:jpg,jpeg,png|max:2048',
         ]);
-        if($request->hasFile('legal_doc') && $request->hasFile('legal_photo')){            
+        if($request->hasFile('legal_doc') && $request->hasFile('legal_photo')){
             $data['legal_doc_url'] = $request->file('legal_doc')->store('legal_docs','public');
             $data['legal_photo_url'] = $request->file('legal_photo')->store('legal_photos','public');
         }
@@ -88,7 +88,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Invalid password'], 401);
         }
 
-        
+
         if(!$user->is_admin_validated){
             return response()->json([
                 'message' => 'Admin has not approved your account yet',
@@ -98,7 +98,7 @@ class UserController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         $user->fcm_token = $request->fcm_token;
         $user->save();
-                
+
         return response()->json([
             'message' => 'Logged in successfully',
             'user'    => $user,
@@ -119,7 +119,7 @@ class UserController extends Controller
             'full_phone_str' => 'required|string|size:13',
         ]);
         $phone = PhoneSensitive::where('full_phone_str', $request->full_phone_str)->first();
-        
+
         if (!$phone) {
             return response()->json([
                 'message' => 'Phone number not found',
@@ -128,7 +128,7 @@ class UserController extends Controller
         }
 
         $user = User::where('phone_sensitive_id', $phone->id)->first();
-        
+
         if($user->is_admin_validated){
             return response()->json([
                 'message'=>'User is approved by admin.',
@@ -141,4 +141,22 @@ class UserController extends Controller
             ],403);
         }
     }
+
+    public function storeFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        $user->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
+
+        return response()->json([
+            'message' => 'FCM token saved',
+        ], 200);
+    }
+
 }

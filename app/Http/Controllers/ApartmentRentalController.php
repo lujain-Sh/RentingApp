@@ -17,13 +17,13 @@ class ApartmentRentalController extends Controller
     //edit update migrate
     //get landloard rentals
     protected $rentalService, $notificationService;
-    
+
     public function __construct(RentalService $rentalService, NotificationService $notificationService)
     {
         $this->rentalService = $rentalService;
         $this->notificationService = $notificationService;
     }
-    
+
     public function createRental(CreateRentalRequest $request, $apartment_id)
     {
         $user_id = Auth::user()->id;
@@ -56,17 +56,17 @@ class ApartmentRentalController extends Controller
                 'message' => 'You already have an active rental request for these dates.'
             ], 409);
         }
-        
+
         $rental=ApartmentRental::create($validatedData);
 
         $rental->unsetRelation('apartment');
         return response()->json([
             'message'=>'rental created successfully',
             'rental_id'=>$rental->id,
-            // 'rental'=>$rental, 
+            // 'rental'=>$rental,
         ],201);
     }
-    
+
     public function getUserRentals()
     {
         $rentals = Auth::user()->rentals;
@@ -74,12 +74,12 @@ class ApartmentRentalController extends Controller
     }
 
     private function getUserRental($rental_id): ?ApartmentRental
-    {   
+    {
         $user_id = Auth::user()->id;
         return ApartmentRental::where('id', $rental_id)
             ->where('user_id', $user_id)->first();
     }
-    
+
     public function cancelRental($rental_id)
     {
         $rental= $this->getUserRental($rental_id);
@@ -100,8 +100,8 @@ class ApartmentRentalController extends Controller
         }
         $rental->update(['status' => 'canceled']);
         return response()->json(['message'=>'rental cancelled successfully',],200);
-    }    
-    
+    }
+
     public function approveRental($rental_id)
     {
         $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
@@ -119,7 +119,7 @@ class ApartmentRentalController extends Controller
 
         if ($this->rentalService->hasApprovedOverlap(
                     $rental->apartment_id , $rental->rental_start_date,
-                    $rental->rental_end_date , $rental->id)) 
+                    $rental->rental_end_date , $rental->id))
         {
             $rental->update(['status' => 'rejected']);
             $rental->unsetRelation('apartment');
@@ -142,7 +142,7 @@ class ApartmentRentalController extends Controller
 
         return response()->json(['message'=>'rental approved !','rental'=>$rental], 200);
     }
-    
+
     public function rejectRental($rental_id)
     {
         $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
@@ -150,7 +150,7 @@ class ApartmentRentalController extends Controller
         if($rental->apartment->user_id !== Auth::id()){
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-    
+
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
         }
@@ -169,7 +169,7 @@ class ApartmentRentalController extends Controller
             'Your rental request for apartment ID '.$rental->apartment_id.' has been rejected.',
             ['rental_id' => $rental->id]
         );
-        
+
         return response()->json(['message'=>'rental rejected !','rental'=>$rental], 200);
     }
 
