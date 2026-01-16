@@ -1,24 +1,41 @@
-*.log
+# OS & IDE
 .DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
+Thumbs.db
 /.idea
-/.nova
-/.phpunit.cache
 /.vscode
+/.fleet
 /.zed
-/auth.json
+/.nova
+
+# Env & secrets
+.env
+.env.*
+
+# Dependencies
+/vendor
 /node_modules
+
+# Laravel runtime
+/storage/framework/*
+/storage/logs/*
+/storage/app/*
+/storage/*.key
+/bootstrap/cache/*
+/public/storage
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
+
+# PHPUnit
+.phpunit.*
+
+# Firebase
+firebase-adminsdk*.json
+/storage/firebase/
+/.firebase
+firebase-debug.log
+
+# Misc
+/auth.json
 Homestead.json
 Homestead.yaml
-Thumbs.db
+*.log

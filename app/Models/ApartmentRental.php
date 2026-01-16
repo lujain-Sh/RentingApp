@@ -24,12 +24,16 @@ class ApartmentRental extends Model
     protected $casts = [
         'status'=>'string',
     ];
+    protected $with = ['pendingUpdateRequest'];
+    
+    protected $hidden = ['created_at, updated_at'];
 
     public function isPending()   { return $this->status === 'pending'; }
     public function isApproved()  { return $this->status === 'approved'; }
     public function isRejected()  { return $this->status === 'rejected'; }
     public function isCanceled()  { return $this->status === 'canceled'; }
     
+
     public function apartment()
     {
         return $this->belongsTo(Apartment::class, 'apartment_id');
