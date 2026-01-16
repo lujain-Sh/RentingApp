@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum Governorate: int //string
 {
-    case DAMASCUS = 0 ;//'Damascus';
+    case DAMASCUS = 14 ;//'Damascus';
     case RIF_DAMASCUS = 1;//'Rif_Damascus';
     case ALEPPO = 2;//'Aleppo';
     case HOMS = 3;//'Homs';

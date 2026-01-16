@@ -211,5 +211,20 @@ class ApartmentRentalController extends Controller
         return response()->json($pastRentals, 200);
     }
 
+    public function getLandlordRentalsWithUpdateRequests()
+    {
+        $user = Auth::user();
+        $rentals = ApartmentRental::whereHas('apartment', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->with([
+            'apartment:id,user_id,title',
+            'user:id,first_name,last_name',
+            'pendingUpdateRequest' 
+        ])
+        ->latest()
+        ->get();
+        return response()->json($rentals, 200);
+    }
 
 }

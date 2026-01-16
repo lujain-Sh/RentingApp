@@ -19,6 +19,7 @@ class RentalUpdateRequest extends Model
         // 'rejection_reason',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function rental()
     {

@@ -35,9 +35,10 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('/user')->group(function()
 {
+    Route::get('/rentals',[ApartmentRentalController::class,'getLandlordRentalsWithUpdateRequests'])->middleware('auth::sanctum');
     Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental']); //->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental']); //->middleware('auth:sanctum');
-    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental']) ->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
 
     Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
     Route::get('/my_past_rentals',[ApartmentRentalController::class,'getUserPastRentals'])->middleware('auth:sanctum');
