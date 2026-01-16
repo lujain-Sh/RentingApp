@@ -108,7 +108,13 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+
+        // clear FCM token
+        $user->fcm_token = null;
+        $user->save();
+
         return response()->json([
             'message'=>'logged out successfully !'
         ],200);

@@ -106,9 +106,9 @@ class ApartmentRentalController extends Controller
     {
         $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
 
-        if($rental->apartment->user_id !== Auth::id()){
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // if($rental->apartment->user_id !== Auth::id()){
+        //     return response()->json(['message' => 'Unauthorized'], 403);
+        // }
 
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
@@ -147,9 +147,9 @@ class ApartmentRentalController extends Controller
     {
         $rental=ApartmentRental::with('apartment')->findOrFail($rental_id);
 
-        if($rental->apartment->user_id !== Auth::id()){
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        // if($rental->apartment->user_id !== Auth::id()){
+        //     return response()->json(['message' => 'Unauthorized'], 403);
+        // }
 
         if(!$rental){
             return response()->json(['message'=>'rental not found',],404);
@@ -182,6 +182,10 @@ class ApartmentRentalController extends Controller
         $ongoingRentals = $user->rentals()
             ->whereIn('status', ['pending','approved'])
             ->where('rental_end_date', '>=', $today)
+            ->with([
+                'apartment.assets',
+                'apartment.user:id,first_name,last_name,legal_photo_url'
+            ])
             ->get();
 
         return response()->json($ongoingRentals, 200);
@@ -198,6 +202,10 @@ class ApartmentRentalController extends Controller
                 $query->where('rental_end_date', '<', $today)
                       ->orWhereIn('status', ['rejected', 'canceled']);
             })
+            ->with([
+                'apartment.assets',
+                'apartment.user:id,first_name,last_name,legal_photo_url'
+            ])
             ->get();
 
         return response()->json($pastRentals, 200);

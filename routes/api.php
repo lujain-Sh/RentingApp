@@ -35,9 +35,9 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('/user')->group(function()
 {
-    Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental'])->middleware('auth:sanctum');
-    Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental'])->middleware('auth:sanctum');
-    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/approve',[ApartmentRentalController::class,'approveRental']); //->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental']); //->middleware('auth:sanctum');
+    Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental']); //->middleware('auth:sanctum');
 
     Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
     Route::get('/my_past_rentals',[ApartmentRentalController::class,'getUserPastRentals'])->middleware('auth:sanctum');
@@ -71,14 +71,16 @@ Route::prefix('/apartments')->group(function()
 
 // Route::middleware('auth:sanctum')->group(function ()
 // {
-Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(function ()
+// Route::prefix('rental-update-requests')->middleware('auth:sanctum')->group(function ()
+// {
+Route::prefix('rental-update-requests')->group(function ()
 {
     Route::put('/{rental_id}/update',[RentalUpdateController::class,'updateRental'])->middleware('auth:sanctum');
     // lists
     Route::get('/mine', [RentalUpdateController::class, 'getUserRentalUpdateRequests']);
     Route::get('/incoming', [RentalUpdateController::class, 'incomingRentalUpdateRequests']);
     // actions on a request
-    Route::put('/{request}/approve', [RentalUpdateController::class, 'approveRentalUpdate']);
+    Route::put('/{update_request_id}/approve', [RentalUpdateController::class, 'approveRentalUpdate']);
     Route::put('/{request}/reject', [RentalUpdateController::class, 'rejectRentalUpdate']);
     Route::put('/{request}/cancel', [RentalUpdateController::class, 'cancelRentalUpdate']);
 });
@@ -100,3 +102,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/apartments/{id}/favorite', [FavoriteController::class, 'toggle']);
     Route::get('/favorites', [FavoriteController::class, 'index']);
 });
+
+
+// logout with fcm delete
+// removed middleware for approve and reject for now
+// changed the notification service to use Kreait for now
+// downloaded some librabies + linked firebase
+// added a method to store fcm token + fixed fcm field migrate
+// made the getUserOngoingRentals and getUserPastRentals return the apartment in the response
