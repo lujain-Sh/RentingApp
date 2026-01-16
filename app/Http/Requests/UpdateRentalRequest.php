@@ -23,8 +23,8 @@ class UpdateRentalRequest extends FormRequest
     {
         $oneYearFromNow = now()->addYear()->toDateString();
         return [
-            'rental_start_date' => 'sometimes|date|date_format:Y/m/d|after_or_equal:today|before_or_equal:' . $oneYearFromNow . '|before_or_equal:rental_end_date',
-            'rental_end_date' => 'sometimes|date|date_format:Y/m/d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow,  
+            'rental_start_date' => 'sometimes|date|date_format:Y-m-d|after_or_equal:today|before_or_equal:' . $oneYearFromNow . '|before_or_equal:rental_end_date',
+            'rental_end_date' => 'sometimes|date|date_format:Y-m-d|after_or_equal:rental_start_date|before_or_equal:' . $oneYearFromNow,
         ];
     }
 }
