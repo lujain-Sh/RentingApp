@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->foreignId('apartment_id')->constrained('apartments')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->decimal('rating',1,1); // Assuming rating is between 1-5
+            $table->decimal('rating',2,1); // Assuming rating is between 1-5
             $table->text('comment')->nullable();
 
             $table->unique(['apartment_id', 'user_id']); // One rating per user per apartment
