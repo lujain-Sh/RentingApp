@@ -16,7 +16,7 @@ class RatingSeeder extends Seeder
     public function run(): void
     {
         $rentals = ApartmentRental::all();
-        // Only finished rentals 
+        // Only finished rentals
         // where('rental_end_date', '<', now())
         //     ->whereNotNull('user_id')
         //     ->get();
@@ -35,7 +35,7 @@ class RatingSeeder extends Seeder
             ApartmentRating::create([
                 'user_id' => $rental->user_id,
                 'apartment_id' => $rental->apartment_id,
-                'rating' => rand(3, 5),
+                'rating' => rand(1, 5),
                 'comment' => fake()->optional()->sentence(10),
             ]);
         }
