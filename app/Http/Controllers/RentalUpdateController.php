@@ -121,9 +121,9 @@ class RentalUpdateController extends Controller
             return response()->json(['message' => 'This request has already been processed'], 422);
         }
 
-        if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized. Only the landlord can reject updates.'], 403);
-        }
+        // if ($updateRequest->rental->apartment->user_id !== Auth::id()) {
+        //     return response()->json(['message' => 'Unauthorized. Only the landlord can reject updates.'], 403);
+        // }
 
         $reason = $request->input('rejection_reason');
 

@@ -40,7 +40,7 @@ Route::prefix('/user')->group(function()
     Route::put('/rentals/{rental_id}/reject',[ApartmentRentalController::class,'rejectRental']); //->middleware('auth:sanctum');
     Route::put('/rentals/{rental_id}/cancel',[ApartmentRentalController::class,'cancelRental'])->middleware('auth:sanctum');
 
-    Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
+    // Route::get('/rentals',[ApartmentRentalController::class,'getUserRentals'])->middleware('auth:sanctum');
     Route::get('/my_past_rentals',[ApartmentRentalController::class,'getUserPastRentals'])->middleware('auth:sanctum');
     Route::get('/my_ongoing_rentals',[ApartmentRentalController::class,'getUserOngoingRentals'])->middleware('auth:sanctum');
 
@@ -82,7 +82,7 @@ Route::prefix('rental-update-requests')->group(function ()
     Route::get('/incoming', [RentalUpdateController::class, 'incomingRentalUpdateRequests']);
     // actions on a request
     Route::put('/{update_request_id}/approve', [RentalUpdateController::class, 'approveRentalUpdate']);
-    Route::put('/{request}/reject', [RentalUpdateController::class, 'rejectRentalUpdate']);
+    Route::put('/{update_request_id}/reject', [RentalUpdateController::class, 'rejectRentalUpdate']);
     Route::put('/{request}/cancel', [RentalUpdateController::class, 'cancelRentalUpdate'])->middleware('auth:sanctum');
 });
 // });

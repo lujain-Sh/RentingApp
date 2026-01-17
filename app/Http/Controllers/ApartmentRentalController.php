@@ -218,9 +218,9 @@ class ApartmentRentalController extends Controller
             $query->where('user_id', $user->id);
         })
         ->with([
-            'apartment:id,user_id,title',
+            'apartment:id,user_id',
             'user:id,first_name,last_name',
-            'pendingUpdateRequest' 
+            'pendingUpdateRequest'
         ])
         ->latest()
         ->get();
