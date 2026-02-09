@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            // $table->tinyInteger('governorate')->unsigned();
-            $table->tinyInteger('governorate');
+            $table->tinyInteger('governorate')->unsigned();
+            // $table->tinyInteger('governorate');
             $table->foreignId('city_id')->constrained('cities');
             $table->string('street');
             $table->string('building_number');
