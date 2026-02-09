@@ -15,7 +15,8 @@ return new class extends Migration
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->tinyInteger('governorate')->unsigned();
+            // $table->tinyInteger('governorate')->unsigned();
+            $table->tinyInteger('governorate');
             $table->timestamps();
         });
     }
