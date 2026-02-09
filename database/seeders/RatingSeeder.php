@@ -7,6 +7,7 @@ use App\Models\ApartmentRating;
 use App\Models\ApartmentRental;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Faker\Factory as Faker; // for render
 
 class RatingSeeder extends Seeder
 {
@@ -15,6 +16,7 @@ class RatingSeeder extends Seeder
      */
     public function run(): void
     {
+        $faker = Faker::create();
         $rentals = ApartmentRental::all();
         // Only finished rentals
         // where('rental_end_date', '<', now())
@@ -36,7 +38,8 @@ class RatingSeeder extends Seeder
                 'user_id' => $rental->user_id,
                 'apartment_id' => $rental->apartment_id,
                 'rating' => rand(1, 5),
-                'comment' => fake()->optional()->sentence(10),
+                // 'comment' => fake()->optional()->sentence(10),
+                'comment' => $faker->optional()->sentence(10),
             ]);
         }
     }
