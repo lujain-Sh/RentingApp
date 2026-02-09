@@ -66,7 +66,7 @@ class ApartmentRatingController extends Controller
 
     public function createRating(CreateApartmentRatingRequest $request, int $apartment_id)
     {
-        // recheck again 
+        // recheck again
         $user = Auth::user();
         if (!$user) {
             return response()->json([
@@ -110,7 +110,7 @@ class ApartmentRatingController extends Controller
 
         $data = $request->validated();
         $rating->rating = $data['rating'];
-        $rating->comment = $data['comment'] ?? $rating->comment;
+        $rating->comment = $data['comment'];
         $rating->save();
 
         return response()->json([
@@ -118,9 +118,9 @@ class ApartmentRatingController extends Controller
             'rating' => $rating,
         ]);
     }
-    // 
+    //
 
-    // 
+    //
     public function listByApartment(int $apartment_id)
     {
         $apartment = Apartment::find($apartment_id);
